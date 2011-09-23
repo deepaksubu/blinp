@@ -1,0 +1,221 @@
+#!/usr/bin/env python
+#
+# flash-stream : Interacts with the specially-configured network reprogramming
+# daemon in the HydroWatch app to stream blocks of sample data from the onboard
+# flash logging volume.
+#
+# KNOWN ISSUE: Wraparound requests (those that traverse the end of the
+# volume) do not work, and should be split into two requests.
+#
+# Example: Pretend the total number of blocks on the flash is 8 (numbered
+# zero to seven, where zero is the recovery block). A request for blocks
+# starting at #6 and going to #2 should be split into two requests, one of
+# block #6 and #7 and another of #1 and #2 (remember, block 0, the recovery
+# block, is skipped).
+#
+# @author Jay Taneja <taneja@cs.berkeley.edu>
+#
+
+import sys, stat, struct, subprocess, time, os.path, socket, getopt, re
+import UdpReport
+
+try:
+    import tos
+except ImportError:
+    import posix
+    sys.path = [os.path.join(posix.environ['TOSROOT'], 'support', 'sdk', 'python')] + sys.path
+    import tos
+from datetime import datetime
+
+# Log Volume
+VOLUME_NUMBER = 2
+VOLUME_SIZE = 1800503 
+BLOCK_SIZE = 528
+REPORT_LENGTH = 60
+
+# Commands for NWProg
+NWPROG_CMD_READ  = 3
+NWPROG_PORT = 5213
+NWPROG_REQ_FMT = "!BBI"
+NWPROG_REPLY_FMT = "!BBBBI"
+
+ERROR_SUCCESS = 0
+nRetries = 3
+methods = []
+
+class CommandFailedException:
+    pass
+
+def send_command(cmd_str, retries):
+    s.sendto(cmd_str, (remote, NWPROG_PORT))
+    s.settimeout(3)
+    (real_cmd, real_imgno, real_offset) = struct.unpack(NWPROG_REQ_FMT, cmd_str[0:6])
+    try:
+        data, addr = s.recvfrom(1024)
+        # make sure this is the guy we're programming
+        if (addr[0] == remote):
+            (error, pack, cmd, imgno, offset) = struct.unpack(NWPROG_REPLY_FMT, data[0:8])
+            if error != ERROR_SUCCESS or real_offset != offset or real_imgno != imgno:
+	    	if table_name == '': 
+	    		print "WARNING: received error while sending block; retrying"
+                raise socket.timeout
+            else: return data
+        else:
+	    if table_name == '':
+            	print "WARNING: received unexpected reply from", addr[0]
+            return False
+    except socket.timeout:
+        # socket timeout out try again
+        if retries > 0:
+            return send_command(cmd_str, retries - 1)
+        else:
+            return False
+
+def read(imgNum, first, last):
+    if (last > first):
+    	split = False
+    	total = length = last - first
+	if table_name == '':
+		print "Total data requested: " + str(total) + " bytes (" + str(first) + " : " + str(last) + ")"
+    else:   
+        # Need to remove the recovery block
+	split = True
+	length = VOLUME_SIZE - first
+	total = VOLUME_SIZE - first + last - BLOCK_SIZE
+	if table_name == '':
+    		print "Total data requested: " + str(total) + " bytes (" + str(first) + " : " + str(last) + ") (Rollover)"
+
+    pkt_offset = first 
+    resp = ''
+    while length > 0:
+#    	print "length, pkt_offset = " + str(length) + "," + str(pkt_offset) 
+        sreqpkt = struct.pack(NWPROG_REQ_FMT, NWPROG_CMD_READ, imgNum, pkt_offset)
+        data = send_command(sreqpkt, 5)
+        if data != False:
+            (error, pack, cmd, imgno, offset) = struct.unpack(NWPROG_REPLY_FMT, data[0:8])
+            if offset == pkt_offset:
+	    	resp += data[8:]
+#		for c in data[8:]:
+#		    print >>sys.stderr, ord(c)
+            else:
+		if table_name == '':
+			print "ERROR: Out of sequence data: aborting"
+                sys.exit(1)
+        pkt_offset += len(data) - 8 
+        length -= (len(data) - 8)
+	if (length <= 0):
+		if (split == True):
+			split = False
+			length = last - BLOCK_SIZE
+			pkt_offset = BLOCK_SIZE
+
+    sampleCount = 0
+    blockCount = 0
+    while total >= REPORT_LENGTH:
+    	respmsg = UdpReport.UdpReport(data=resp[6 + sampleCount * REPORT_LENGTH + blockCount * BLOCK_SIZE:6 + REPORT_LENGTH + sampleCount * REPORT_LENGTH + blockCount * BLOCK_SIZE])
+#	print "range: " + str(6 + sampleCount * REPORT_LENGTH + blockCount * BLOCK_SIZE) + " : " + str(6 + REPORT_LENGTH + sampleCount * REPORT_LENGTH + blockCount * BLOCK_SIZE)
+	total = total - REPORT_LENGTH
+	if (blockCount + first/BLOCK_SIZE) >= (VOLUME_SIZE / BLOCK_SIZE):
+		blockNum = (blockCount + first/BLOCK_SIZE) % (VOLUME_SIZE / BLOCK_SIZE) + 1
+	else:
+		blockNum = (blockCount + first/BLOCK_SIZE) % (VOLUME_SIZE / BLOCK_SIZE)
+	if (table_name == ''):
+		print "block: " + str(blockNum) + ", sample: " + str(sampleCount) + " (" + str(0+sampleCount*REPORT_LENGTH) + ":" + str(REPORT_LENGTH+sampleCount*REPORT_LENGTH) + "), seqno: " + str(respmsg.get_seqno()) + "," + str(respmsg.get_blockID())
+	else:
+		AA = remote.split(":")
+            	thisInsert = insert
+		thisInsert += time.strftime("%s") + ", "
+            	thisInsert += "0x" + AA[-1] + ", "
+ 
+           	for m in methods:
+                    	try:
+                    		getter = getattr(respmsg, 'get_' + m, None)
+                    		val = getter()
+			except:
+                    		val = 0
+                	if (isinstance(val, list)):
+                    		val = val[0]
+                	thisInsert += str(val) + ", "
+            	thisInsert = thisInsert[0:len(thisInsert) - 2]
+            	thisInsert += ");"
+
+ 	        print thisInsert		
+
+	sampleCount = sampleCount + 1
+	if sampleCount >= int(BLOCK_SIZE / REPORT_LENGTH):
+		blockCount = blockCount + 1
+		sampleCount = 0
+		total -= BLOCK_SIZE % REPORT_LENGTH;
+    return True
+            
+
+def print_usage():
+    print
+    print "Usage: %s [first block] [last block] [ip_address] <MySQL table_name>" % sys.argv[0]
+    print
+
+def checkImgNum(imgNum):
+    # Checks for valid image number format
+    try:
+        imgNum = int(imgNum)
+    except:
+        print "ERROR: Image number is not valid"
+        sys.exit(-1)
+    return imgNum
+
+# ======== MAIN ======== #
+if __name__ == '__main__':
+
+	if len(sys.argv) != 4 and len(sys.argv) != 5:
+		print_usage()
+		sys.exit(1)
+
+	imgNum = checkImgNum(VOLUME_NUMBER)
+
+	cmd = "read"
+	cmd_fn = read
+	remote = sys.argv[3]
+
+	try:
+		first = long(sys.argv[1])
+		last = long(sys.argv[2]) + 1
+	except Exception, e:
+		print "First and last blocks not valid"
+		print_usage()
+		print str(e)
+		exit(2)
+
+	first *= BLOCK_SIZE
+	last *= BLOCK_SIZE
+
+	if (first > VOLUME_SIZE or last > VOLUME_SIZE):
+		print "Data range (" + str(first) + ":" + str(last) + ") is invalid for volume size (" + str(VOLUME_SIZE) + ")"
+		exit(2)
+
+	table_name = ''
+	if len(sys.argv) == 5:
+		table_name = sys.argv[4]
+		insert = "INSERT IGNORE INTO " + str(table_name) + " (unixtimeRecv, origin, "
+		re = re.compile('^get_(.*)')
+    		for method in dir(UdpReport.UdpReport):
+        		result = re.search(method)
+        		if result != None:
+		            insert += str(result.group(1)) + ", "
+       			    methods.append(str(result.group(1)))
+    		insert = insert[0:len(insert) - 2]
+    		insert += ") VALUES ("
+
+	try:
+		s = socket.socket(socket.AF_INET6, socket.SOCK_DGRAM)
+		if cmd_fn(imgNum, first, last):
+			if table_name == '':
+				print "Success!"
+			s.close()
+	except KeyboardInterrupt:
+		print "Interrupted; exiting"
+		sys.exit(2)
+	except Exception, e:
+		print "Received unexpected exception while reading"
+		print str(e)
+		s.close()
+		pass

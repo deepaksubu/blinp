@@ -1,0 +1,5 @@
+# the sleep interval needs to be set the same for all participating devices
+CFLAGS += -DLOW_POWER_LISTENING -DLPL_SLEEP_INTERVAL=512 
+
+# also modify blip's L2 parameters to reduce media overload
+CFLAGS +=-DBLIP_L2_RETRIES=2 -DBLIP_L2_DELAY=2048

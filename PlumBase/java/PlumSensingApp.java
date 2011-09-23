@@ -28,55 +28,6 @@ enum PlumCommands {
     public int value()   { return value; }
 }
 
-class CollectedDataStore {
-	private List<Integer> addrList;
-	private List<CollectedData> cdataList;
-	private PlumSensingApp app;
-	
-	public CollectedDataStore(PlumSensingApp app) {
-		this.addrList = new ArrayList<Integer>();
-		this.cdataList = new ArrayList<CollectedData>();
-		this.app = app;
-	}
-
-	public void addRead(int addr) {
-		int indexAddr = addrList.indexOf(addr);
-		if (indexAddr >= 0) {
-		    cdataList.get(indexAddr).reset();
-			
-			System.out.print("Added message to data store (existing @ " + indexAddr + ") : addr = " + addr + "\n");
-		}
-		else {
-			CollectedData cdata = new CollectedData(app, addr);
-			addrList.add(addr);
-			cdataList.add(cdata);
-			System.out.print("Added address to data store (not existing @ " + Integer.toString(cdataList.size() - 1) + ") : addr = " + addr + "\n");
-		}
-	}
-	
-	public void addSample(int addr, int seqno, long unixTime, int blockID, PlumSampleMsg message) {
-		int indexAddr = addrList.indexOf(addr);
-		if (indexAddr >= 0) {
-			cdataList.get(indexAddr).add(seqno, unixTime, blockID, message);
-//			System.out.print("Added sample to data store (existing @ " + indexAddr + ") : addr = " + addr + ", seqno = " + seqno + "\n");
-		}
-		else {
-			System.out.print("Could not add sample to data store (addr " + addr + " does not exist)\n");
-		}
-	}
-
-	public CollectedData getCD(int addr) {
-		int indexAddr = addrList.indexOf(addr);
-		if (indexAddr >= 0) {
-			return cdataList.get(indexAddr);
-		}
-		else {
-			System.out.print("ERROR: Could not return CD from collected data store (addr = " + addr + ")\n");
-			return null;
-		}
-	}
-}
-
 class CollectedData {
 	private List<Integer> seqnoList;
 	private List<Long> unixTimeList;
@@ -84,40 +35,32 @@ class CollectedData {
 	private List<PlumSampleMsg> messageList;
 	private PlumSensingApp app;
 	public int addr;
+	public int blockStart;
+	public int blockEnd;
 	public int blockRcvd;
 	public Integer size;
 	
-	public CollectedData(PlumSensingApp app, int addr) {
+	public CollectedData(PlumSensingApp app, int addr, int blockStart, int blockEnd) {
 		this.seqnoList = new ArrayList<Integer>();
 		this.unixTimeList = new ArrayList<Long>();
 		this.blockIDList = new ArrayList<Integer>(); 
 		this.messageList = new ArrayList<PlumSampleMsg>();
 		this.app = app;
 		this.addr = addr;
+		this.blockStart = blockStart;
+		this.blockEnd = blockEnd;
 		this.blockRcvd = 0;
 		this.size = 0;
 	}
 
-	public void reset() {
-		this.seqnoList = new ArrayList<Integer>();
-		this.unixTimeList = new ArrayList<Long>();
-		this.blockIDList = new ArrayList<Integer>(); 
-		this.messageList = new ArrayList<PlumSampleMsg>();
-		this.blockRcvd = 0;
-		this.size = 0;
-	}
-	
 	public void add(int seqno, long unixTime, int blockID, PlumSampleMsg message) {
 		int indexSeqno = seqnoList.indexOf(seqno);
 		int indexUnixTime = unixTimeList.indexOf(unixTime);
 		int indexBlockID = blockIDList.indexOf(blockID);
 
-//		if ((indexSeqno == indexUnixTime && indexUnixTime == indexBlockID) && (indexBlockID >= 0)) {
-//		if (indexSeqno == indexUnixTime && indexUnixTime >= 0) {
-		if (indexSeqno >= 0) {
-//		if (indexSeqno >= 0 && indexUnixTime >= 0 && blockIDList.get(indexUnixTime) == blockID)
+		if ((indexSeqno == indexUnixTime && indexUnixTime == indexBlockID) && (indexBlockID >= 0)) {
 			// Duplicate!
-//			System.out.print("Received duplicate - dumping: seqno = " + seqno + " , unixTime = " + unixTime + " , blockID = " + blockID + "\n");
+			System.out.print("Received duplicate - dumping: seqno = " + seqno + " , unixTime = " + unixTime + " , blockID = " + blockID + "\n");
 		}
 		else {					
 			seqnoList.add(seqno);
@@ -126,9 +69,7 @@ class CollectedData {
 			messageList.add(message);
 			size = size + 1;
 
-//			System.out.print("Received non-duplicate - adding: seqno = " + seqno + " , unixTime = " + unixTime + " , blockID = " + blockID + "indices = " + indexSeqno + " " + indexUnixTime + " " + indexBlockID + " , indices added = " + Integer.toString(seqnoList.size() - 1) + " " + Integer.toString(unixTimeList.size() - 1) + " " + Integer.toString(blockIDList.size() - 1) + "\n");
-			
-//			Collections.sort(seqnoList);
+			Collections.sort(seqnoList);
 
 			if (blockID > this.blockRcvd || (blockID == 2 && this.blockRcvd > 4)) {
 				this.blockRcvd = blockID;
@@ -143,85 +84,33 @@ class CollectedData {
 		int holes = -1;
 		List<Integer> holeListBlockID = new ArrayList<Integer>();
 		int holeIndex;
-		int firstBlock, lastBlock;
-		List<Integer> sortedSeqnoList = seqnoList;
-		Collections.sort(sortedSeqnoList);
-
-		System.out.print("Finding holes in data from address " + addr + " : first = " + first + " (" + seqnoList.get(first) + ") , last = " + last + " (" + seqnoList.get(last-1) + ")\n");
+		
+		System.out.print("Finding holes : first = " + first + " (" + seqnoList.get(first) + ") , last = " + last + " (" + seqnoList.get(last-1) + ")\n");
 
 		while (holes != 0) {
 			holes = 0;
 			while (index < last - first) {
-				if (sortedSeqnoList.get(index) > sortedSeqnoList.get(index-1) + 1) {
-					holeIndex = sortedSeqnoList.get(index-1) + 1;
-					firstBlock = blockIDList.get(seqnoList.indexOf(sortedSeqnoList.get(index)));
-					if (index + 1 < sortedSeqnoList.size()) {
-						lastBlock = blockIDList.get(seqnoList.indexOf(sortedSeqnoList.get(index+1)));
+				if (seqnoList.get(index) > seqnoList.get(index-1) + 1) {
+					holeIndex = seqnoList.get(index-1) + 1;
+					while (holeIndex < seqnoList.get(index)) {
+						System.out.print("Hole at " + holeIndex + " : indices = " + (index-1) + " (" + seqnoList.get(index-1) + ") , " + index + " (" + seqnoList.get(index) + ")\n");
+						holeListBlockID.add(blockIDList.get(index));
+						holeIndex = holeIndex + 1;
 					}
-					else {
-						lastBlock = firstBlock;
-					}
-					while (holeIndex < sortedSeqnoList.get(index)) {
-//						holeIndex = sortedSeqnoList.get(index-1) + 1;
-						// JKT: Workaround for large sequence number jumping bug.
-						// Not sure of the cause of this bug - worthy of further investigation.
-						if (holeIndex + 1000 < sortedSeqnoList.get(index)) {
-							System.out.print("Large jump in sequence numbers (" + holeIndex + " - " + sortedSeqnoList.get(index) + "). Ignore.\n");
-							holeIndex = sortedSeqnoList.get(index);
-						}
-						else {
-							System.out.print("Hole at " + holeIndex + " : indices = " + (index-1) + " (" + sortedSeqnoList.get(index-1) + ") , " + index + " (" + sortedSeqnoList.get(index) + ")\n");
-//						System.out.print("holeIndex = " + holeIndex + ", sortedSeqnoList(-1) = " + sortedSeqnoList.get(index-1) + ", sortedSeqnoList() = " + sortedSeqnoList.get(index) + ", " + seqnoList.indexOf(sortedSeqnoList.get(index)) + "\n");
-							holeIndex = holeIndex + 1;
-							holes = holes + 1;
-						}
-					}
-					if (firstBlock < lastBlock) {
-						while (firstBlock <= lastBlock) {						
-							holeListBlockID.add(firstBlock);
-							firstBlock = firstBlock + 1;
-						}
-					}
-					else {
-						holeListBlockID.add(firstBlock);
-					}
+					holes = holes + 1;
 				}
-				index = index + 1;					
+				index = index + 1;
 			}
 			if (holes > 0) {
-//				Set<Integer> holeSetBlockID = Collections.synchronizedSet(new HashSet<Integer>(holeListBlockID));				
-//				Collections.sort(holeSetBlockID);
+				System.out.print("\nFound " + holes + " total hole(s). Retrying...\n\n");
 
-				BlockIDSet holeSetBlockID = new BlockIDSet(holeListBlockID);
-
-				System.out.print("\nFound " + holes + " total hole(s) in " + holeSetBlockID.size() + " total block(s). Retrying...\n\n");
+				Set<Integer> holeSetBlockID = Collections.synchronizedSet(new HashSet<Integer>(holeListBlockID));
 				
-				int firstHole = -1, lastHole = -1;
-				for (int i = 0 ; i < holeSetBlockID.size() ; i++) {
-					if (firstHole == -1) {
-						firstHole = holeSetBlockID.get(i);
-						lastHole = holeSetBlockID.get(i);
-//						System.out.print("Starting new hole batch at block " + firstHole + "\n");
-					}
-					else if (lastHole + 5 >= holeSetBlockID.get(i)) {
-						lastHole = holeSetBlockID.get(i);
-//						System.out.print("Adding to hole batch --> " + firstHole + " to " + lastHole + "\n");
-					}
-					else {
-//						System.out.print("Hole batch complete --> " + firstHole + " to " + lastHole + "\n");
-						app.requestSamples(addr, firstHole, lastHole, false);
-						Thread.sleep(500L);
-						firstHole = holeSetBlockID.get(i);
-						lastHole = holeSetBlockID.get(i);
-//						System.out.print("Starting new hole batch --> " + firstHole + " to " + lastHole + "\n");
-					}
+				for (int i:holeSetBlockID) {
+					app.requestSamples(addr, i, i, false);
+					Thread.sleep(500L);
 				}
 
-				if (firstHole != -1) {
-					// Request last group of samples
-					app.requestSamples(addr, firstHole, lastHole, false);
-				}
-				
 				Thread.sleep(32000L);
 				
 				break;
@@ -233,32 +122,6 @@ class CollectedData {
 		}
 
 		return holes;
-	}
-}
-
-class BlockIDSet {
-	private List<Integer> blockIDList;
-
-	public BlockIDSet(List<Integer> bIDList) {
-		this.blockIDList = new ArrayList<Integer>();
-
-		int index = 0;
-		for (index = 0 ; index < bIDList.size() ; index++) {
-			int indexBlockID = blockIDList.indexOf(bIDList.get(index));
-
-			if (indexBlockID < 0) {
-				blockIDList.add(bIDList.get(index));
-				Collections.sort(blockIDList);
-			}
-		}
-	}
-
-	public int get(int index) {
-		return blockIDList.get(index);
-	}
-
-	public int size() {
-		return blockIDList.size();
 	}
 }
 	
@@ -349,32 +212,20 @@ class FlashState {
 }
 
 class DataCollector implements Runnable {
-	private PlumSensingApp app;
 	private CollectedData cdata;
-	private int addr;
-	private int blockStart;
-	private int blockEnd;
-	private int retries = 0;
-	private int readRetries = 0;
-	int READ_RETRIES = 3;
-	int MAX_RETRIES = 5;
 	int SHORT_TIMEOUT_COUNT = 5;
 	int LONG_TIMEOUT_COUNT = 32;
 
-	public DataCollector(PlumSensingApp app, CollectedData collectedData, int addr, int blockStart, int blockEnd) {
-		this.app = app;
+	public DataCollector(CollectedData collectedData) {
 		this.cdata = collectedData;
-		this.addr = addr;
-		this.blockStart = blockStart;
-		this.blockEnd = blockEnd;
 	}
-	
+
 	public void run() {
 		try {
 			int size = cdata.size;
 			int shortTimeoutCount = 0;
 			int longTimeoutCount = 0;
-			double expectedSize = (blockEnd - blockStart - 1) * (Math.floor(522.0 / PlumSampleMsg.DEFAULT_MESSAGE_SIZE) - 0);
+			double expectedSize = (cdata.blockEnd - cdata.blockStart - 1) * (Math.floor(522.0 / PlumSampleMsg.DEFAULT_MESSAGE_SIZE) - 0);
 			int numHoles = 0;
 		  
 			if (expectedSize < 0) {				
@@ -435,17 +286,8 @@ class DataCollector implements Runnable {
 
 			longTimeoutCount = 0;
 			while (true) {
-				System.out.print("\nCurrent Status: " + cdata.size + " / " + expectedSize + " \n");
-				size = cdata.size;
-				if (retries >= MAX_RETRIES) {
-					// need to write file here
-					System.out.print("\nReached maximum number of retries. Ending hole finding with " + numHoles + " holes left...\n");
-					break;
-				}
-				
 				if (cdata.size > 0 && expectedSize > 0) {
 					numHoles = cdata.findHoles();
-					retries = retries + 1;
 					if (numHoles == 0) {
 						break;
 					}
@@ -454,14 +296,8 @@ class DataCollector implements Runnable {
 					break;
 				}
 				else {
-					if (readRetries >= READ_RETRIES) {
-						System.out.print("\nError - incomplete message - maximum number of retries reached. Total received: " + cdata.size + " , total expected: at least " + expectedSize + "\n");
-						break;
-					}
-					else {
-						app.requestSamples(addr, blockStart, blockEnd, false);						
-					}
-					readRetries = readRetries + 1;
+					System.out.print("\nError - incomplete message - total received: " + cdata.size + " , total expected: at least " + expectedSize + "\n");
+					break;
 				}
 
 				longTimeoutCount = longTimeoutCount + 1;
@@ -483,9 +319,7 @@ public class PlumSensingApp implements MessageListener
 	MoteIF mote;
 	boolean m_scan = false, m_read = false;
 	FlashState flashState = new FlashState();
-	CollectedDataStore collectedDataStore = new CollectedDataStore(this);
-
-	boolean drop_state = false;
+	CollectedData collectedData;
 
 	PlumCmdMsg requestMsg = new PlumCmdMsg();
 
@@ -498,29 +332,18 @@ public class PlumSensingApp implements MessageListener
 	}
 	
 	synchronized public void messageReceived(int dest_addr, Message msg) {
-//		Random generator = new Random();
+		Random generator = new Random();
 		
 		if (msg instanceof PlumSampleMsg) {
 			if (m_read == true) {
 				PlumSampleMsg receivedMsg = (PlumSampleMsg) msg;
 
-//				if (drop_state == false) {
-//					if (generator.nextInt(50) < 2)
-//					if (generator.nextInt(50) < 0)
-//						drop_state = true;
+//				if (generator.nextInt(50) > 0) {
+					collectedData.add(receivedMsg.get_seqno(), receivedMsg.get_unixTime(), receivedMsg.get_blockID(), receivedMsg);
 //				}
 //				else {
-//					if (generator.nextInt(50) > 20)
-//						drop_state = false;
-//				}
-
-//				if (drop_state == true && generator.nextInt(50) > 20) {
-//						System.out.print("Dropped sample packet randomly from node " + receivedMsg.get_sender() + " with sequence number " + receivedMsg.get_seqno() + "\n");
+//					System.out.print("Dropped sample packet randomly\n");
 					// drop packet
-//				}
-//				else {
-//					System.out.print("Received sample from node " + receivedMsg.get_sender() + " with sequence number " + receivedMsg.get_seqno() + "\n");
-				collectedDataStore.addSample(receivedMsg.get_sender(), receivedMsg.get_seqno(), receivedMsg.get_unixTime(), receivedMsg.get_blockID(), receivedMsg);
 //				}
 				
 //		System.out.print("Received from " + receivedMsg.get_sender() + " (seq no, unix time, block) : ( " + receivedMsg.get_seqno() + " , " + receivedMsg.get_unixTime() + " , " + receivedMsg.get_blockID() + " )\n");
@@ -535,17 +358,12 @@ public class PlumSensingApp implements MessageListener
 //				System.out.print("Status : " + msg.toString());
 //				System.out.print("First : " + receivedMsg.get_first_blockID() + "\n");
 //				System.out.print("Last : " + receivedMsg.get_last_blockID() + "\n");
-				if (receivedMsg.get_sampleRate() < 60 && receivedMsg.get_statusRate() < 1200) {
-					flashState.add(receivedMsg.get_sender(), receivedMsg.get_first_blockID(), receivedMsg.get_last_blockID(), receivedMsg.get_sampleRate(), receivedMsg.get_statusRate());
+				flashState.add(receivedMsg.get_sender(), receivedMsg.get_first_blockID(), receivedMsg.get_last_blockID(), receivedMsg.get_sampleRate(), receivedMsg.get_statusRate());
 
-					if (Math.abs(receivedMsg.get_last_unixTime() - (System.currentTimeMillis() / 1000L)) > receivedMsg.get_statusRate() * 10) {
-						System.out.print("Sending node " + receivedMsg.get_sender() + " new time value: " + (System.currentTimeMillis() / 1000L) + ". Old time value: " + receivedMsg.get_last_unixTime() + ".\n");
-						sendTime(receivedMsg.get_sender());			
-					}
-				}
-				else {
-					System.out.print("Dumped out-of-range status message.\n");
-				}
+				if (Math.abs(receivedMsg.get_last_unixTime() - (System.currentTimeMillis() / 1000L)) > receivedMsg.get_statusRate() * 3) {
+					System.out.print("Sending node " + receivedMsg.get_sender() + " new time value: " + (System.currentTimeMillis() / 1000L) + ". Old time value: " + receivedMsg.get_last_unixTime() + ".\n");
+					sendTime(receivedMsg.get_sender());			
+				}					
 			}
 		}
 		else if (msg instanceof PlumCmdMsg) {
@@ -655,8 +473,8 @@ public class PlumSensingApp implements MessageListener
 		m_read = true;
 
 		if (newThread == true) {
-			collectedDataStore.addRead(addr);
-			DataCollector dc = new DataCollector(this, collectedDataStore.getCD(addr), addr, requestMsg.get_blockStart(), requestMsg.get_blockEnd());
+			collectedData = new CollectedData(this, addr, requestMsg.get_blockStart(), requestMsg.get_blockEnd());
+			DataCollector dc = new DataCollector(collectedData);
 			Thread dc_t = new Thread(dc);
 			dc_t.start();
 		}
@@ -709,7 +527,7 @@ public class PlumSensingApp implements MessageListener
 		int unixTime = (int) (System.currentTimeMillis() / 1000L);
 		requestMsg.set_unixTime(unixTime);
 			
-//		System.out.print("Setting time on node " + addr + ".\n\n");
+		System.out.print("Setting time on node " + addr + ".\n\n");
 			
 		try {
 			mote.send(addr, requestMsg);

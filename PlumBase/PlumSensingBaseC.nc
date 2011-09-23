@@ -8,7 +8,7 @@
 #include "printf.h"
 
 #define MSG_BUFFER_SIZE 50
-#define COMMAND_TIMEOUT 190
+#define COMMAND_TIMEOUT 20
 #define COMMAND_TIMER 5
 #define ONE_MINUTE 61440 // 60 * 1024
 
@@ -92,8 +92,7 @@ implementation {
 	  uint32_t current_time = call TimeCounter.get();
 	  plum_cmd_msg_t emptyMsg;
 
-//	  if (current_time - msgTimes[current_index] > COMMAND_TIMEOUT * 1000L && current_index != currentBuffer) {	  
-	  while (current_time - msgTimes[current_index] > COMMAND_TIMEOUT * 1000L && current_index != currentBuffer) {	  
+	  if (current_time - msgTimes[current_index] > COMMAND_TIMEOUT * 1000L && current_index != currentBuffer) {	  
 		  atomic {
 			  if (current_time - msgTimes[current_index] > COMMAND_TIMEOUT * 1000L && current_index != currentBuffer) {
 //				  printf("Removing stale message in queue for addr: %d, position = %d (%d-%d), cmd = %d, times = %ld,%ld\n", msgBuffer[current_index].addr, current_index, bufferTail, currentBuffer, msgBuffer[current_index].cmdID, msgTimes[current_index], current_time);
@@ -102,14 +101,9 @@ implementation {
 				  msgTimes[current_index] = 0;
 				  memcpy(&msgBuffer[current_index], &emptyMsg, sizeof(plum_cmd_msg_t));
 				  bufferTail = (bufferTail + 1) % MSG_BUFFER_SIZE;
-
-				  current_index = bufferTail;
-			  }
-			  else {
-				  current_index = (current_index + 1) % MSG_BUFFER_SIZE;
 			  }
 		  }
-//		  post removeStaleCmd();
+		  post removeStaleCmd();
 	  }
   }
 	  
@@ -195,7 +189,10 @@ implementation {
 							 !(((plum_cmd_msg_t *) payload)->blockStart == msgBuffer[current_index].blockStart &&
 							   ((plum_cmd_msg_t *) payload)->blockEnd == msgBuffer[current_index].blockEnd)) {
 //						printf("Received command message: addr = %d, cmd = %d, tail = %d, current = %d, not replaced = %d\n", ((plum_cmd_msg_t *) payload)->addr, ((plum_cmd_msg_t *) payload)->cmdID, bufferTail, currentBuffer, current_index);
-//						printfflush();						
+//						printfflush();
+//						
+//						msgWritten = TRUE;
+//						break;
 					}
 					else if (((plum_cmd_msg_t *) payload)->cmdID == PLUM_TIME) {
 						memcpy(&msgBuffer[current_index], payload, len);
@@ -321,7 +318,7 @@ implementation {
 
 					msgPending = TRUE;
 
-//					printf("Found message in queue for addr: %d, position = %d, cmd = %d\n", msgBuffer[current_index].addr, current_index, msgBuffer[current_index].cmdID);
+//					printf("Found message in queue for addr: %d, position = %d, cmd = %d\n", call RadioAMPacket.source(msg), current_index, msgBuffer[current_index].cmdID);
 //					printfflush();
 					
 					while (current_index != currentBuffer) {

@@ -1,0 +1,205 @@
+#!/usr/bin/env python
+# -*- python -*-
+
+import sys
+import imp
+import threading
+import readline
+import atexit
+import struct, re
+import signal
+import getopt
+import os.path
+from BlipSocketComm import BlipSocketComm
+from BlipUartComm import BlipUartComm
+from Exceptions import ParseException, CommException
+
+import BlipBuiltins
+
+class BlipShell:
+
+    def __init__(self, comm):
+        self.comm = comm
+
+        self.printers = {}
+        self.parsers  = {}
+
+        self.replyListener = BlipShell.BlipListener(self)
+        self.commandListener = BlipShell.BlipCommandline(self)
+
+        self.register(BlipBuiltins.CmdError())
+        self.register(BlipBuiltins.CmdEcho())
+        self.register(BlipBuiltins.CmdPing())
+        self.register(BlipBuiltins.PingReply())
+        self.register(BlipBuiltins.PingDone())
+        self.register(BlipBuiltins.CmdIdent())
+        self.register(BlipBuiltins.CmdUptime())
+
+        self.load_rc()
+
+    def register(self, cmd_cls):
+        if cmd_cls.cmd_name() != None:
+            self.parsers[cmd_cls.cmd_name()] = cmd_cls
+            
+        self.printers[cmd_cls.cmd_id()] = cmd_cls
+        
+    def register_package(self, package):
+        try:
+            mod, classname = package.split(".")
+        except ValueError, e:
+            print "Invalid module string"
+            return
+            
+        fp = None
+        clsinst = None
+        try:
+            fp, pathname, description = imp.find_module(mod)
+            mod = imp.load_module(mod, fp, pathname, description)
+            cls = getattr(mod, classname)
+            clsinst = cls()
+            self.register(clsinst)
+        except:
+            print "Error loading", package
+        finally:
+            if fp: fp.close()
+
+    def start(self):
+        self.replyListener.start()
+        self.commandListener.start()
+
+    def stop(self):
+        self.comm.close()
+
+    def print_help(self, args):
+        if len(args) == 1:
+            cmds = [cmd for cmd in self.parsers]
+            cmds = cmds + ['quit', 'help']
+            cmds.sort()
+            print "sdsh-2.0:",
+            for c in cmds:
+                print c,
+            print
+        else:
+            try:
+                cls = self.parsers[args[1]]
+                print cls.__doc__
+            except:
+                print "Failed loading implementation for", args[1]
+
+    def process(self, cmd):
+        if cmd[0] == '':
+            return
+        elif cmd[0] == 'register':
+            self.register_package(cmd[1])
+        elif cmd[0] == 'help':
+            self.print_help(cmd)
+        elif cmd[0] == 'lecho':
+            print ' '.join(cmd[1:])
+        else:
+            try:
+                msgdata,forward = self.parsers[cmd[0]].parse(cmd)
+                package = struct.pack(">HB", self.parsers[cmd[0]].cmd_id(), forward)
+                data = package + msgdata
+                self.comm.send(data)
+            except KeyError:
+                print "blipsh: %s: not implemented!" % cmd[0]
+            except ParseException:
+                print self.parsers[cmd[0]].__doc__                
+
+    def load_rc(self):
+        rcfile = os.path.expanduser("~/.bliprc")
+        
+        try:
+            fp = open(rcfile, "r")
+            for line in fp.readlines():
+                line = re.sub('#.*$', '', line.strip())
+                cmd = re.split('[ ]+',line)
+                self.process(cmd)
+        except IOError, e:
+            pass
+
+    class BlipListener(threading.Thread):
+        def __init__(self, parent):
+            self.shell = parent
+            threading.Thread.__init__ ( self )
+
+            # this is a trick so we'll exit when only this thread is left
+            self.daemon = True
+            self.setDaemon(True)
+
+        def run(self):
+            while True:
+                data, addr = self.shell.comm.recvfrom(1024)
+                if len(data) == 0:
+                    return
+
+                t,forward = struct.unpack('>hb', data[0:3])
+                self.shell.printers[t].display(data[3:])
+
+    class BlipCommandline(threading.Thread):
+        def __init__(self, parent):
+            self.shell = parent
+
+            threading.Thread.__init__ ( self )
+
+        def run(self):
+            histfile = os.path.expanduser("~/.blip_history")
+            try:
+                readline.read_history_file(histfile)
+            except: pass
+            atexit.register(readline.write_history_file, histfile)
+            atexit.register(self.shell.stop)
+
+	    if not runcmd == None:
+		cmd = re.split('[ ]+',runcmd)
+		try:
+		    self.shell.process(cmd)
+		except CommException, e:
+		    print "socket error:", e
+		    return
+		print "\"" + runcmd + "\" sent."
+		return
+
+            while True:
+                try:
+                    line = raw_input('> ')
+                except EOFError:
+                    return
+
+                if line == 'quit':
+                    return
+                    
+                cmd = re.split('[ ]+',line)
+                try:
+                    self.shell.process(cmd)
+                except CommException, e:
+                    print "socket error:", e
+                    return
+
+
+
+def hlp():
+    print "\n\t%s [-u] [-i iface] [-e cmd] <addr>\n" % sys.argv[0]
+    sys.exit(1)
+
+if __name__ == '__main__':
+
+    comm = None
+    iface = None
+    runcmd = None
+    opts,args = getopt.getopt(sys.argv[1:], "u:i:e:")
+    for o,a in opts:
+        if o == '-u':
+            comm = BlipUartComm(a)
+        elif o == '-i':
+            iface = a
+	elif o == '-e':
+	    runcmd = a
+    
+    if comm == None and len(args) == 0:
+        hlp()
+    elif comm == None:
+        comm = BlipSocketComm(args[0], Interface=iface)
+        
+    s = BlipShell(comm)
+    s.start()

@@ -24,7 +24,7 @@ public class PlumNodeJPanel extends JPanel {
 
 	private BindingGroup m_bindingGroup;
 	private PlumNode plumNode;
-	private JTextField textField1;
+	private JProgressBar batteryLeftJProgressBar;
 	private JProgressBar spaceLeftJProgressBar;
 	private JTextField textField;
 
@@ -65,23 +65,13 @@ public class PlumNodeJPanel extends JPanel {
 		labelGbc_1.gridy = 1;
 		add(batteryLeftLabel, labelGbc_1);
 
-/*		batteryLeftJProgressBar = new JProgressBar();
+		batteryLeftJProgressBar = new JProgressBar();
 		GridBagConstraints componentGbc_1 = new GridBagConstraints();
 		componentGbc_1.insets = new Insets(5, 0, 5, 0);
 		componentGbc_1.fill = GridBagConstraints.HORIZONTAL;
 		componentGbc_1.gridx = 1;
 		componentGbc_1.gridy = 1;
 		add(batteryLeftJProgressBar, componentGbc_1);
-*/
-		textField1 = new JTextField();
-		textField1.setEditable(false);
-		GridBagConstraints gbc_textField1 = new GridBagConstraints();
-		gbc_textField.insets = new Insets(5, 0, 5, 0);
-		gbc_textField.fill = GridBagConstraints.HORIZONTAL;
-		gbc_textField.gridx = 1;
-		gbc_textField.gridy = 1;
-		add(textField1, gbc_textField1);
-		textField1.setColumns(10);
 
 		JLabel spaceLeftLabel = new JLabel("SpaceLeft:");
 		GridBagConstraints labelGbc_2 = new GridBagConstraints();
@@ -141,11 +131,11 @@ public class PlumNodeJPanel extends JPanel {
 	protected BindingGroup initDataBindings() {
 		BeanProperty<PlumNode, Integer> batteryLeftProperty = BeanProperty
 				.create("batteryLeft");
-		BeanProperty<JTextField, Integer> valueProperty_1 = BeanProperty
+		BeanProperty<JProgressBar, Integer> valueProperty_1 = BeanProperty
 				.create("value");
-		AutoBinding<PlumNode, Integer, JTextField, Integer> autoBinding_1 = Bindings
+		AutoBinding<PlumNode, Integer, JProgressBar, Integer> autoBinding_1 = Bindings
 				.createAutoBinding(UpdateStrategy.READ, plumNode,
-						batteryLeftProperty, textField1,
+						batteryLeftProperty, batteryLeftJProgressBar,
 						valueProperty_1);
 		autoBinding_1.bind();
 		//

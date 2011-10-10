@@ -3,22 +3,28 @@ package com.plum.tinyos.model;
 import java.util.ArrayList;
 import java.util.List;
 
+
+
 public class FlashState { 
 	private List<Integer> addrList;
 	private List<Integer> firstList;
 	private List<Integer> lastList;
 	private List<Integer> sampleRateList;
-	private List<Integer> statusRateList;	
+	private List<Integer> statusRateList;
+	private List<Integer> intVolList;
+	private List<PlumNode> pnList;
 
 	public FlashState() { 
 		this.addrList = new ArrayList<Integer>();
 		this.firstList = new ArrayList<Integer>(); 
 		this.lastList = new ArrayList<Integer>(); 
 		this.sampleRateList = new ArrayList<Integer>(); 
-		this.statusRateList = new ArrayList<Integer>(); 
+		this.statusRateList = new ArrayList<Integer>();
+		this.intVolList = new ArrayList<Integer>();
+		this.pnList=new ArrayList<PlumNode>();
 	}
 
-	public void add(int addr, int first, int last, int sampleRate, int statusRate) {
+	public void add(int addr, int first, int last, int sampleRate, int statusRate, int intVol) {
 		int index = addrList.indexOf(addr);
 		
 //		System.out.print("Adding address " + addr + " with locations : " + first + " , " + last + ", index = " + index + "\n");
@@ -29,6 +35,9 @@ public class FlashState {
 			lastList.set(index, last+1);
 			sampleRateList.set(index, sampleRate);
 			statusRateList.set(index, statusRate);
+			intVolList.set(index, intVol);
+			pnList.set(index, new PlumNode(addr,intVol,last+1));
+			
 		}
 		else {
 			addrList.add(addr);
@@ -37,6 +46,8 @@ public class FlashState {
 			lastList.add(last+1);
 			sampleRateList.add(sampleRate);
 			statusRateList.add(statusRate);
+			intVolList.add(intVol);
+			pnList.add(new PlumNode(addr,intVol,last+1));
 		}
 	}
 
@@ -91,6 +102,11 @@ public class FlashState {
 	public List<Integer> getAddrList() {
 		// TODO Auto-generated method stub
 		return this.addrList;
+	}
+
+	public List<PlumNode> getPNList() {
+		// TODO Auto-generated method stub
+		return this.pnList;
 	}
 }
 /**

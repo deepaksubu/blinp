@@ -76,7 +76,7 @@ public class BrowserToolBar extends JToolBar {
 								* 1000L;
 					
 							//for (int i : localAddressList) {
-						        String input = JOptionPane.showInputDialog("Enter Input:");
+						        String input = JOptionPane.showInputDialog("Enter Plum Node ID:");
 								localPsa.requestSamples(Integer.parseInt(input),"" ,0, 0, true);
 								/*try {
 									Thread.sleep(100000L);

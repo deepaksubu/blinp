@@ -9,6 +9,7 @@ public class PlumNode{
 	
 	public PlumNode(){
 		super();
+		
 	}
 	
 	public int id;
@@ -40,11 +41,21 @@ public class PlumNode{
 	public int spaceLeft;
 	
 	//This below constructor is just a hardcoded placeholder. Replace it by actual logic
-	public PlumNode(int id, int batteryLeft, int spaceLeft){
+	public PlumNode(int id, int batteryLeft){
 		super();
 		this.id=id;
-		this.batteryLeft=batteryLeft;
-		this.spaceLeft=spaceLeft;
+		float fbatteryLeft=((float)batteryLeft/4095)*100;
+		this.batteryLeft=50;//Math.round(fbatteryLeft);
+		this.spaceLeft=100;
+	}
+	
+	public PlumNode(int id, int batteryLeft, int lastBlock){
+		super();
+		this.id=id;
+		float fbatteryLeft=((float)batteryLeft/4095)*100;
+		this.batteryLeft=Math.round(fbatteryLeft);
+		float fspaceLeft=((float)(3475-lastBlock)/3475)*100;
+		this.spaceLeft=Math.round(fspaceLeft);
 	}
  
 }

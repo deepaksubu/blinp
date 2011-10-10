@@ -74,7 +74,9 @@ public class DataCollector implements Runnable {
 						shortTimeoutCount = 0;
 						longTimeoutCount = 0;
 					} else {
+						System.out.println("shortTimeoutCount Increment 1"+longTimeoutCount);
 						shortTimeoutCount = shortTimeoutCount + 1;
+						System.out.println("longTimeoutCount Increment 1"+longTimeoutCount);
 						longTimeoutCount = longTimeoutCount + 1;
 						if (shortTimeoutCount >= SHORT_TIMEOUT_COUNT * 10
 								&& cdata.size >= expectedSize) {
@@ -118,10 +120,13 @@ public class DataCollector implements Runnable {
 				}
 
 				if (cdata.size > 0 && expectedSize > 0) {
+					readRetries = readRetries + 1;
+					System.out.println("Read Retries Increment 1"+readRetries);
 					numHoles = cdata.findHoles(mote);
 					retries = retries + 1;
+					System.out.println("Plain Retries Increment 1"+retries);
 					if (numHoles == 0) {
-
+                   
 						if (!mote.getSource().getPacketSource().getName()
 								.contains("sf@localhost:9002")) {
 							System.out.println("Closing source : "
@@ -129,10 +134,12 @@ public class DataCollector implements Runnable {
 											.getName());
 							mote.getSource().shutdown();
 						}
+						System.out.println("Number of Holes is zero");
 						break;
 					}
 					
 				} else if (expectedSize == 0) {
+					
 					break;
 				} else {
 					if (readRetries >= READ_RETRIES) {
@@ -152,14 +159,17 @@ public class DataCollector implements Runnable {
                         writeFlag=false;
 						break;
 					} else {
+						System.out.println("This is start of request samples");
 						app.requestSamples(addr, mote.getSource()
 								.getPacketSource().getName(), blockStart,
 								blockEnd, false);
 						Thread.sleep(32000L);
+						System.out.println("This is end of request samples");
 					}
+					System.out.println("Read Retries Increment 2"+readRetries);
 					readRetries = readRetries + 1;
 				}
-
+				System.out.println("longTimeoutCount Increment 2"+longTimeoutCount);
 				longTimeoutCount = longTimeoutCount + 1;
 				if (longTimeoutCount >= LONG_TIMEOUT_COUNT * 10) {
 					break;

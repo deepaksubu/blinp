@@ -60,9 +60,9 @@ public class CollectedData {
 //		if ((indexSeqno == indexUnixTime && indexUnixTime == indexBlockID) && (indexBlockID >= 0)) {
 //		if (indexSeqno == indexUnixTime && indexUnixTime >= 0) {
 		if (indexSeqno >= 0) {
-//		if (indexSeqno >= 0 && indexUnixTime >= 0 && blockIDList.get(indexUnixTime) == blockID)
+		if (indexSeqno >= 0 && indexUnixTime >= 0 && blockIDList.get(indexUnixTime) == blockID)
 			// Duplicate!
-//			System.out.print("Received duplicate - dumping: seqno = " + seqno + " , unixTime = " + unixTime + " , blockID = " + blockID + "\n");
+			System.out.print("Received duplicate - dumping: seqno = " + seqno + " , unixTime = " + unixTime + " , blockID = " + blockID + "\n");
 		}
 		else {					
 			seqnoList.add(seqno);
@@ -116,6 +116,7 @@ public class CollectedData {
 						out.write(Integer.toString((pSM.get_sampleRate())));
 						out.write(",");
 						out.write(Long.toString(pSM.get_unixTime()));
+						System.out.println(Long.toString(pSM.get_unixTime()));
 						out.write(",");
 						java.util.Date d = new java.util.Date(
 								pSM.get_unixTime() * 1000L);

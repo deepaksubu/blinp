@@ -5,10 +5,15 @@ package com.plum.tinyos.ui;
 //object. Elements of the list represent HTML pages for a web site.
 //
 import java.awt.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.List;
 
 import javax.swing.*;
 import javax.swing.event.*;
+
+import com.plum.tinyos.model.FlashState;
+import com.plum.tinyos.model.PlumSensingApp;
 
 public class SiteFrame extends JInternalFrame {
 
@@ -30,16 +35,19 @@ public SiteFrame(String name, List<Integer> localAddressList, SiteManager sm) {
 	 reference[counter]=Integer.toString(i);
 	 counter++;
  }
- nameList = new JList(reference);
+ PlumSensingApp localPsa=parent.getPsa();
+ FlashState localFs=localPsa.getFlashState();
+ DefaultListModel localListModel=localFs.getListModel();
+ nameList = new JList(localListModel);
 // sm.getPsa().requestScan();
  //this.nameList.setModel(psa.getFlashState().getPlumListModel());
- 
+
  nameList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
  nameList.addListSelectionListener(new ListSelectionListener() {
    public void valueChanged(ListSelectionEvent lse) {
      // We know this is the list, so pop up the page.
      if (!lse.getValueIsAdjusting()) {
-       parent.addPageFrame((String)nameList.getSelectedValue());
+       parent.addPageFrame((String) nameList.getSelectedValue());
      }
    }
  });
@@ -47,3 +55,4 @@ public SiteFrame(String name, List<Integer> localAddressList, SiteManager sm) {
  contentPane.add(nameList, BorderLayout.CENTER);
 }
 }
+

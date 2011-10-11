@@ -3,6 +3,8 @@ package com.plum.tinyos.model;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.DefaultListModel;
+
 
 
 public class FlashState { 
@@ -13,6 +15,7 @@ public class FlashState {
 	private List<Integer> statusRateList;
 	private List<Integer> intVolList;
 	private List<PlumNode> pnList;
+	private DefaultListModel listModel;
 
 	public FlashState() { 
 		this.addrList = new ArrayList<Integer>();
@@ -22,6 +25,7 @@ public class FlashState {
 		this.statusRateList = new ArrayList<Integer>();
 		this.intVolList = new ArrayList<Integer>();
 		this.pnList=new ArrayList<PlumNode>();
+		this.listModel=new DefaultListModel();
 	}
 
 	public void add(int addr, int first, int last, int sampleRate, int statusRate, int intVol) {
@@ -48,6 +52,7 @@ public class FlashState {
 			statusRateList.add(statusRate);
 			intVolList.add(intVol);
 			pnList.add(new PlumNode(addr,intVol,last+1));
+			listModel.addElement(Integer.toString(addr));
 		}
 	}
 
@@ -107,6 +112,11 @@ public class FlashState {
 	public List<PlumNode> getPNList() {
 		// TODO Auto-generated method stub
 		return this.pnList;
+	}
+
+	public DefaultListModel getListModel() {
+		// TODO Auto-generated method stub
+		return this.listModel;
 	}
 }
 /**

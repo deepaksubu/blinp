@@ -36,6 +36,10 @@ public class PlumSensingApp implements MessageListener {
 	boolean m_scan = false, m_read = false;
 	FlashState flashState = new FlashState();
 	CollectedDataStore collectedDataStore = new CollectedDataStore(this);
+	
+	public CollectedDataStore getCollectedDataStore(){
+		return this.collectedDataStore;
+	}
 
 	boolean drop_state = false;
 
@@ -119,7 +123,7 @@ public class PlumSensingApp implements MessageListener {
 								+ (System.currentTimeMillis() / 1000L)
 								+ ". Old time value: "
 								+ receivedMsg.get_last_unixTime() + ".\n");
-					//	sendTime(receivedMsg.get_sender());
+						sendTime(receivedMsg.get_sender());
 					}
 				} else {
 					System.out.print("Dumped out-of-range status message.\n");
@@ -361,7 +365,7 @@ public class PlumSensingApp implements MessageListener {
 
 		try {
 			SerialForwarder sfr = new SerialForwarder(new String[] { "-comm",
-					"serial@COM26:telos", "-no-gui" });
+					"serial@COM26:telos", "-no-gui" }); 
 			try {
 				Thread.sleep(1000);
 			} catch (InterruptedException e) {
@@ -493,6 +497,9 @@ public class PlumSensingApp implements MessageListener {
 		// TODO Auto-generated method stub
 		return this.flashState;
 	}
+	
+	
+	
 }
 /**
  * enum PlumCommands { PLUM_SCAN (1), PLUM_CONFIG (2), PLUM_READ (3), PLUM_ERASE

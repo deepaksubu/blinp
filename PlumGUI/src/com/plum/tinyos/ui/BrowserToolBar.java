@@ -3,8 +3,11 @@ package com.plum.tinyos.ui;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
 
 import javax.swing.*;
 
@@ -12,8 +15,7 @@ import com.plum.tinyos.model.FlashState;
 import com.plum.tinyos.model.PlumConstants;
 import com.plum.tinyos.model.PlumSensingApp;
 
-
-public class BrowserToolBar extends JToolBar {
+public class BrowserToolBar extends JToolBar{
 	SiteManager sm;
 	PlumSensingApp localPsa;
 	FlashState fs;
@@ -29,28 +31,30 @@ public class BrowserToolBar extends JToolBar {
 			ToolBarButton button = new ToolBarButton(toolbarLabels[i], sm);
 			button.addActionListener(new ActionListener() {
 
+			
+
 				@Override
 				public void actionPerformed(ActionEvent e) {
 					// TODO Auto-generated method stub
 
 					localPsa = sm.getPsa();
-			//		localAddressList = new ArrayList<Long>();
-			//		localSet = new HashSet<Long>();
+					// localAddressList = new ArrayList<Long>();
+					// localSet = new HashSet<Long>();
 
 					if (e.getActionCommand() == PlumConstants.START_SCAN) {
-						//System.out.println("Deepak" + e.getActionCommand());
+						// System.out.println("Deepak" + e.getActionCommand());
 						localPsa.requestScan();
-			//			localAddressList = new ArrayList<Long>();
-						
-						try {
-							Thread.sleep(PlumConstants.SCAN_PERIOD);
-						} catch (InterruptedException e1) {
-							// TODO Auto-generated catch block
-							e1.printStackTrace();
-						}
+						// localAddressList = new ArrayList<Long>();
 
-						localAddressList = localPsa.getFlashState().getAddrList();
-				//		localSet = new HashSet<Long>();
+						/*
+						 * try { Thread.sleep(PlumConstants.SCAN_PERIOD); }
+						 * catch (InterruptedException e1) { // TODO
+						 * Auto-generated catch block e1.printStackTrace(); }
+						 */
+
+						localAddressList = localPsa.getFlashState()
+								.getAddrList();
+						// localSet = new HashSet<Long>();
 						try {
 							fs = localPsa.getFlashState();
 							sm.addSiteFrame("scan", localAddressList);
@@ -60,32 +64,34 @@ public class BrowserToolBar extends JToolBar {
 
 					} else if (e.getActionCommand() == PlumConstants.READ) {
 						localPsa.requestScan();
-				//		JFileChooser fc = new JFileChooser();
+						// JFileChooser fc = new JFileChooser();
 
-				//		int returnVal = fc.showSaveDialog((ToolBarButton) e
-				//				.getSource());
-				//		if (returnVal == JFileChooser.APPROVE_OPTION) {
-				//			File file = fc.getSelectedFile();
-				//			localPsa.setFile();
-				//		}
-					//	localAddressList = new ArrayList<Long>();
-					//	localAddressList = fs.getAddrList();
-					//	localSet = new HashSet<Long>(localAddressList);
+						// int returnVal = fc.showSaveDialog((ToolBarButton) e
+						// .getSource());
+						// if (returnVal == JFileChooser.APPROVE_OPTION) {
+						// File file = fc.getSelectedFile();
+						// localPsa.setFile();
+						// }
+						// localAddressList = new ArrayList<Long>();
+						// localAddressList = fs.getAddrList();
+						// localSet = new HashSet<Long>(localAddressList);
 						Long start = System.currentTimeMillis();
-						Long end = System.currentTimeMillis() + PlumConstants.READ_TIMEOUT_UI
-								* 1000L;
-					
-							//for (int i : localAddressList) {
-						        String input = JOptionPane.showInputDialog("Enter Plum Node ID:");
-								localPsa.requestSamples(Integer.parseInt(input),"" ,0, 0, true);
-								/*try {
-									Thread.sleep(100000L);
-								} catch (InterruptedException e1) {
-									// TODO Auto-generated catch block
-									e1.printStackTrace();
-								}*/
-								
-							//}
+						Long end = System.currentTimeMillis()
+								+ PlumConstants.READ_TIMEOUT_UI * 1000L;
+
+						// for (int i : localAddressList) {
+						String input = JOptionPane
+								.showInputDialog("Enter Plum Node ID:");
+						localPsa.requestSamples(Integer.parseInt(input), "", 0,
+								0, true);
+						
+						/*
+						 * try { Thread.sleep(100000L); } catch
+						 * (InterruptedException e1) { // TODO Auto-generated
+						 * catch block e1.printStackTrace(); }
+						 */
+
+						// }
 
 					}
 					// In response to a button click:
@@ -95,6 +101,7 @@ public class BrowserToolBar extends JToolBar {
 					}
 
 				}
+
 			}
 
 			);
@@ -120,4 +127,6 @@ public class BrowserToolBar extends JToolBar {
 				button.setText(null);
 		}
 	}
+
+
 }

@@ -117,7 +117,7 @@ public class SiteManager extends JFrame {
 	    super("Plum Manager");
 	    
 	    plumList=new PlumList();
-	    setSize(450, 600);
+	    setSize(450, PlumConstants.WINDOW_WIDTH);
 	    setDefaultCloseOperation(EXIT_ON_CLOSE);
 	    Container contentPane = getContentPane();
 	    BrowserToolBar jtb = new BrowserToolBar(this);
@@ -171,7 +171,7 @@ public class SiteManager extends JFrame {
 		// TODO Auto-generated method stub
 		  handler = WindowHandler.getInstance(this);
 		    //obtaining a logger instance and setting the handler
-		    logger = Logger.getLogger("sam.logging.handler");
+		    logger = Logger.getLogger("deepak.logging.handler");
 		    logger.addHandler(handler);
 		
 	}

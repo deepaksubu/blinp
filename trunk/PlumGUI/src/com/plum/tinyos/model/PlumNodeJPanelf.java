@@ -1,4 +1,4 @@
-package com.plum.tinyos.ui;
+package com.plum.tinyos.model;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -6,7 +6,8 @@ import java.awt.Insets;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JProgressBar;
+import javax.swing.JSlider;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 
 import org.jdesktop.beansbinding.AutoBinding;
@@ -14,25 +15,21 @@ import org.jdesktop.beansbinding.BeanProperty;
 import org.jdesktop.beansbinding.BindingGroup;
 import org.jdesktop.beansbinding.Bindings;
 
-public class PlumNodeJPanel extends JPanel {
+public class PlumNodeJPanelf extends JPanel {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private BindingGroup m_bindingGroup;
 	private com.plum.tinyos.model.PlumNode plumNode = new com.plum.tinyos.model.PlumNode();
-	private JTextField idJTextField;
-	private JTextField unixTimeJTextField;
+	private JTextArea idJTextArea;
+	private JTextArea unixTimeJTextArea;
 	private JTextField batteryLeftJTextField;
-	private JProgressBar spaceLeftJProgressBar;
+	private JSlider spaceLeftJSlider;
 
-	public PlumNodeJPanel(com.plum.tinyos.model.PlumNode newPlumNode) {
+	public PlumNodeJPanelf(com.plum.tinyos.model.PlumNode newPlumNode) {
 		this();
 		setPlumNode(newPlumNode);
 	}
 
-	public PlumNodeJPanel() {
+	public PlumNodeJPanelf() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };
@@ -47,13 +44,13 @@ public class PlumNodeJPanel extends JPanel {
 		labelGbc_0.gridy = 0;
 		add(idLabel, labelGbc_0);
 
-		idJTextField = new JTextField();
+		idJTextArea = new JTextArea();
 		GridBagConstraints componentGbc_0 = new GridBagConstraints();
 		componentGbc_0.insets = new Insets(5, 0, 5, 5);
 		componentGbc_0.fill = GridBagConstraints.HORIZONTAL;
 		componentGbc_0.gridx = 1;
 		componentGbc_0.gridy = 0;
-		add(idJTextField, componentGbc_0);
+		add(idJTextArea, componentGbc_0);
 
 		JLabel unixTimeLabel = new JLabel("UnixTime:");
 		GridBagConstraints labelGbc_1 = new GridBagConstraints();
@@ -62,13 +59,13 @@ public class PlumNodeJPanel extends JPanel {
 		labelGbc_1.gridy = 1;
 		add(unixTimeLabel, labelGbc_1);
 
-		unixTimeJTextField = new JTextField();
+		unixTimeJTextArea = new JTextArea();
 		GridBagConstraints componentGbc_1 = new GridBagConstraints();
 		componentGbc_1.insets = new Insets(5, 0, 5, 5);
 		componentGbc_1.fill = GridBagConstraints.HORIZONTAL;
 		componentGbc_1.gridx = 1;
 		componentGbc_1.gridy = 1;
-		add(unixTimeJTextField, componentGbc_1);
+		add(unixTimeJTextArea, componentGbc_1);
 
 		JLabel batteryLeftLabel = new JLabel("BatteryLeft:");
 		GridBagConstraints labelGbc_2 = new GridBagConstraints();
@@ -92,13 +89,13 @@ public class PlumNodeJPanel extends JPanel {
 		labelGbc_3.gridy = 3;
 		add(spaceLeftLabel, labelGbc_3);
 
-		spaceLeftJProgressBar = new JProgressBar();
+		spaceLeftJSlider = new JSlider();
 		GridBagConstraints componentGbc_3 = new GridBagConstraints();
 		componentGbc_3.insets = new Insets(5, 0, 5, 5);
 		componentGbc_3.fill = GridBagConstraints.HORIZONTAL;
 		componentGbc_3.gridx = 1;
 		componentGbc_3.gridy = 3;
-		add(spaceLeftJProgressBar, componentGbc_3);
+		add(spaceLeftJSlider, componentGbc_3);
 
 		if (plumNode != null) {
 			m_bindingGroup = initDataBindings();
@@ -108,20 +105,20 @@ public class PlumNodeJPanel extends JPanel {
 	protected BindingGroup initDataBindings() {
 		BeanProperty<com.plum.tinyos.model.PlumNode, java.lang.Integer> idProperty = BeanProperty
 				.create("id");
-		BeanProperty<javax.swing.JTextField, java.lang.String> textProperty = BeanProperty
+		BeanProperty<javax.swing.JTextArea, java.lang.String> textProperty = BeanProperty
 				.create("text");
-		AutoBinding<com.plum.tinyos.model.PlumNode, java.lang.Integer, javax.swing.JTextField, java.lang.String> autoBinding = Bindings
+		AutoBinding<com.plum.tinyos.model.PlumNode, java.lang.Integer, javax.swing.JTextArea, java.lang.String> autoBinding = Bindings
 				.createAutoBinding(AutoBinding.UpdateStrategy.READ, plumNode,
-						idProperty, idJTextField, textProperty);
+						idProperty, idJTextArea, textProperty);
 		autoBinding.bind();
 		//
 		BeanProperty<com.plum.tinyos.model.PlumNode, java.lang.String> unixTimeProperty = BeanProperty
 				.create("unixTime");
-		BeanProperty<javax.swing.JTextField, java.lang.String> textProperty_1 = BeanProperty
+		BeanProperty<javax.swing.JTextArea, java.lang.String> textProperty_1 = BeanProperty
 				.create("text");
-		AutoBinding<com.plum.tinyos.model.PlumNode, java.lang.String, javax.swing.JTextField, java.lang.String> autoBinding_1 = Bindings
+		AutoBinding<com.plum.tinyos.model.PlumNode, java.lang.String, javax.swing.JTextArea, java.lang.String> autoBinding_1 = Bindings
 				.createAutoBinding(AutoBinding.UpdateStrategy.READ, plumNode,
-						unixTimeProperty, unixTimeJTextField, textProperty_1);
+						unixTimeProperty, unixTimeJTextArea, textProperty_1);
 		autoBinding_1.bind();
 		//
 		BeanProperty<com.plum.tinyos.model.PlumNode, java.lang.Integer> batteryLeftProperty = BeanProperty
@@ -136,11 +133,11 @@ public class PlumNodeJPanel extends JPanel {
 		//
 		BeanProperty<com.plum.tinyos.model.PlumNode, java.lang.Integer> spaceLeftProperty = BeanProperty
 				.create("spaceLeft");
-		BeanProperty<javax.swing.JProgressBar, java.lang.Integer> valueProperty = BeanProperty
+		BeanProperty<javax.swing.JSlider, java.lang.Integer> valueProperty = BeanProperty
 				.create("value");
-		AutoBinding<com.plum.tinyos.model.PlumNode, java.lang.Integer, javax.swing.JProgressBar, java.lang.Integer> autoBinding_3 = Bindings
+		AutoBinding<com.plum.tinyos.model.PlumNode, java.lang.Integer, javax.swing.JSlider, java.lang.Integer> autoBinding_3 = Bindings
 				.createAutoBinding(AutoBinding.UpdateStrategy.READ, plumNode,
-						spaceLeftProperty, spaceLeftJProgressBar, valueProperty);
+						spaceLeftProperty, spaceLeftJSlider, valueProperty);
 		autoBinding_3.bind();
 		//
 		BindingGroup bindingGroup = new BindingGroup();

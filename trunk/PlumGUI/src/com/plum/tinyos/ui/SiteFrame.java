@@ -27,7 +27,7 @@ String[] plums={};
 public SiteFrame(String name, List<Integer> localAddressList, SiteManager sm) {
  super("Nodes Detected ", true, true, true);
  parent = sm;
- setBounds(0,0,250,PlumConstants.SITE_FRAME_OFFSET_Y);
+ setBounds(0,0,PlumConstants.WINDOW_WIDTH,PlumConstants.SITE_FRAME_OFFSET_Y);
  //setBounds(0,0,250,parent.getHeight());
  this.maximizable=false;
  String[] reference=new String[localAddressList.size()];

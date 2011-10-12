@@ -1,4 +1,4 @@
-package com.plum.tinyos.ui;
+package com.plum.tinyos.model;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,12 +14,8 @@ import org.jdesktop.beansbinding.BeanProperty;
 import org.jdesktop.beansbinding.BindingGroup;
 import org.jdesktop.beansbinding.Bindings;
 
-public class PlumNodeJPanel extends JPanel {
+public class PlumNodeJPanelhh extends JPanel {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private BindingGroup m_bindingGroup;
 	private com.plum.tinyos.model.PlumNode plumNode = new com.plum.tinyos.model.PlumNode();
 	private JTextField idJTextField;
@@ -27,12 +23,12 @@ public class PlumNodeJPanel extends JPanel {
 	private JTextField batteryLeftJTextField;
 	private JProgressBar spaceLeftJProgressBar;
 
-	public PlumNodeJPanel(com.plum.tinyos.model.PlumNode newPlumNode) {
+	public PlumNodeJPanelhh(com.plum.tinyos.model.PlumNode newPlumNode) {
 		this();
 		setPlumNode(newPlumNode);
 	}
 
-	public PlumNodeJPanel() {
+	public PlumNodeJPanelhh() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[] { 0, 0, 0 };
 		gridBagLayout.rowHeights = new int[] { 0, 0, 0, 0, 0 };

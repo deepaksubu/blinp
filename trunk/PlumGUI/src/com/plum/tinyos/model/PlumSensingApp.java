@@ -175,9 +175,10 @@ public class PlumSensingApp implements MessageListener {
 			if (m_scan == false) {
 				System.out.print("Scanning...\n");
 				WindowHandler h = WindowHandler.getInstance(sm);
-			    LogRecord r = new LogRecord(Level.INFO,
-			        "Scanning...\n.");
-			    h.publish(r);
+			//    LogRecord r = new LogRecord(Level.INFO,
+			 //       "Scanning...\n.");
+			    sm.getLogger().info("Scanning");
+			//    h.publish(r);
 				m_scan = true;
 			} else {
 				System.out.print("Stopping scanning...\n");

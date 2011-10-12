@@ -1,6 +1,8 @@
 package com.plum.tinyos.log;
 
 
+import java.awt.Rectangle;
+
 import javax.swing.JFrame;
 import javax.swing.JInternalFrame;
 import javax.swing.JTextArea;
@@ -34,7 +36,17 @@ public class LogWindow extends JInternalFrame {
    *            the Logging information data
    */
   public void showInfo(String data) {
-    textArea.append(data);
+	 
+	  
+	textArea.append(data);
+	 try{
+		  int len=textArea.getText().length();
+		  textArea.setCaretPosition(len);
+		  }
+		  catch(Exception E){
+			  E.printStackTrace();
+		  }
+	
     this.getContentPane().validate();
   }
 }

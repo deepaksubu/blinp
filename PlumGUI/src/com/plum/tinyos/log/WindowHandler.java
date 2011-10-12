@@ -32,7 +32,7 @@ public class WindowHandler extends Handler {
 	  this.parent=parent;
     configure();
     if (window == null)
-      window = this.parent.addLogWindow("Logging window", PlumConstants.SITE_FRAME_OFFSET_Y, PlumConstants.WINDOW_WIDTH);
+      window = this.parent.addLogWindow("Logging window", PlumConstants.WINDOW_WIDTH-15,PlumConstants.INITIAL_APP_HEIGTH-PlumConstants.SITE_FRAME_HEIGHT );
   }
 
   /**

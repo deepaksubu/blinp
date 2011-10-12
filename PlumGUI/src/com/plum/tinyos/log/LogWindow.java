@@ -26,7 +26,7 @@ public class LogWindow extends JInternalFrame {
     pane = new JScrollPane(textArea);
     getContentPane().add(pane);
     setVisible(true);
-    setLocation(0,PlumConstants.LOG_WINDOW_OFFSET_Y);
+    setLocation(0,PlumConstants.SITE_FRAME_HEIGHT);
   }
 
   /**

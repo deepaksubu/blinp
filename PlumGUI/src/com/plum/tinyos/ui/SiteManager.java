@@ -193,8 +193,8 @@ public class SiteManager extends JFrame {
 	    popups.addElement(pf);
 	  }
 	  
-	  public LogWindow addLogWindow(String name,int length,int width) {
-		    LogWindow lf = new LogWindow(name,length,width);
+	  public LogWindow addLogWindow(String name,int width,int height) {
+		    LogWindow lf = new LogWindow(name,width,height);
 		    desktop.add(lf, new Integer(1));
 		    lf.setVisible(true);
 		    lf.setIconifiable(true);

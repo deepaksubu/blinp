@@ -29,7 +29,7 @@ public class PageFrame extends JInternalFrame implements ActionListener {
 	public PageFrame(String plumId, SiteManager sm) {
 		super("Node: " + plumId, true, true, true, true);
 		parent = sm;
-		setBounds(0, 0, 300, 150);
+		setBounds(50, 0, 300, 175);
 		localPlumId = plumId;
 		Container contentPane = getContentPane();
 

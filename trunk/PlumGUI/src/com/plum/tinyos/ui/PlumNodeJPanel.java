@@ -14,12 +14,10 @@ import org.jdesktop.beansbinding.BeanProperty;
 import org.jdesktop.beansbinding.BindingGroup;
 import org.jdesktop.beansbinding.Bindings;
 
+import com.plum.tinyos.model.PlumNode;
+
 public class PlumNodeJPanel extends JPanel {
 
-	/**
-	 * 
-	 */
-	private static final long serialVersionUID = 1L;
 	private BindingGroup m_bindingGroup;
 	private com.plum.tinyos.model.PlumNode plumNode = new com.plum.tinyos.model.PlumNode();
 	private JTextField idJTextField;
@@ -53,6 +51,7 @@ public class PlumNodeJPanel extends JPanel {
 		componentGbc_0.fill = GridBagConstraints.HORIZONTAL;
 		componentGbc_0.gridx = 1;
 		componentGbc_0.gridy = 0;
+		idJTextField.setEditable(false);
 		add(idJTextField, componentGbc_0);
 
 		JLabel unixTimeLabel = new JLabel("UnixTime:");
@@ -68,6 +67,7 @@ public class PlumNodeJPanel extends JPanel {
 		componentGbc_1.fill = GridBagConstraints.HORIZONTAL;
 		componentGbc_1.gridx = 1;
 		componentGbc_1.gridy = 1;
+		unixTimeJTextField.setEditable(false);
 		add(unixTimeJTextField, componentGbc_1);
 
 		JLabel batteryLeftLabel = new JLabel("BatteryLeft:");
@@ -83,6 +83,7 @@ public class PlumNodeJPanel extends JPanel {
 		componentGbc_2.fill = GridBagConstraints.HORIZONTAL;
 		componentGbc_2.gridx = 1;
 		componentGbc_2.gridy = 2;
+		batteryLeftJTextField.setEditable(false);
 		add(batteryLeftJTextField, componentGbc_2);
 
 		JLabel spaceLeftLabel = new JLabel("SpaceLeft:");

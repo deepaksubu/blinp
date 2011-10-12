@@ -6,6 +6,7 @@ public class PlumConstants {
 	public static final String SAVE_AS = "Save As";
 	public static final String READ = "Download";
 	public static String STOP_SCAN="Stop Scan";
+	public static final int SITE_FRAME_HEIGHT=200;
 	public static final String DEFAULT_PORT = "23";
 	public static final int SCAN_PERIOD = 1000*60*2;
 	public static final int READ_WAIT_PERIOD=1000*60*1;

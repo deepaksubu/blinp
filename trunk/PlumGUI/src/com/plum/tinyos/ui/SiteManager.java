@@ -117,7 +117,7 @@ public class SiteManager extends JFrame {
 	    super("Plum Manager");
 	    
 	    plumList=new PlumList();
-	    setSize(450, PlumConstants.WINDOW_WIDTH);
+	    setSize(PlumConstants.WINDOW_WIDTH,PlumConstants.INITIAL_APP_HEIGTH);
 	    setDefaultCloseOperation(EXIT_ON_CLOSE);
 	    Container contentPane = getContentPane();
 	    BrowserToolBar jtb = new BrowserToolBar(this);

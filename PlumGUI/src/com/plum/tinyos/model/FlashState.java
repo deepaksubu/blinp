@@ -14,6 +14,7 @@ public class FlashState {
 	private List<Integer> sampleRateList;
 	private List<Integer> statusRateList;
 	private List<Integer> intVolList;
+	private List<Long> unixTimeList;
 	private List<PlumNode> pnList;
 	private DefaultListModel listModel;
 
@@ -24,11 +25,12 @@ public class FlashState {
 		this.sampleRateList = new ArrayList<Integer>(); 
 		this.statusRateList = new ArrayList<Integer>();
 		this.intVolList = new ArrayList<Integer>();
+		this.unixTimeList=new ArrayList<Long>();
 		this.pnList=new ArrayList<PlumNode>();
 		this.listModel=new DefaultListModel();
 	}
 
-	public void add(int addr, int first, int last, int sampleRate, int statusRate, int intVol) {
+	public void add(int addr, int first, int last, int sampleRate, int statusRate, int intVol, long unixTime) {
 		int index = addrList.indexOf(addr);
 		
 //		System.out.print("Adding address " + addr + " with locations : " + first + " , " + last + ", index = " + index + "\n");
@@ -40,7 +42,8 @@ public class FlashState {
 			sampleRateList.set(index, sampleRate);
 			statusRateList.set(index, statusRate);
 			intVolList.set(index, intVol);
-			pnList.set(index, new PlumNode(addr,intVol,last+1));
+			unixTimeList.set(index, unixTime);
+			pnList.set(index, new PlumNode(addr,intVol,last+1,unixTime));
 			
 		}
 		else {
@@ -51,7 +54,8 @@ public class FlashState {
 			sampleRateList.add(sampleRate);
 			statusRateList.add(statusRate);
 			intVolList.add(intVol);
-			pnList.add(new PlumNode(addr,intVol,last+1));
+			unixTimeList.add(unixTime);
+			pnList.add(new PlumNode(addr,intVol,last+1,unixTime));
 			listModel.addElement(Integer.toString(addr));
 		}
 	}

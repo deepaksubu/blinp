@@ -11,8 +11,8 @@ public class PlumList {
 	public PlumList() {
 		ArrayList<PlumNode> plums=new ArrayList<PlumNode>();
 		for (int i = 0; i < 10; i++) {
-			plums.add(new PlumNode(i, (int) (Math.random() * 100), (int) (Math
-					.random() * 100)));
+		//	plums.add(new PlumNode(i, (int) (Math.random() * 100), (int) (Math
+		//			.random() * 100)));
 		}
 		this.plums=plums;
 		

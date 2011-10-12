@@ -27,6 +27,7 @@ public class PlumNodeJPanel extends JPanel {
 	private JProgressBar batteryLeftJProgressBar;
 	private JProgressBar spaceLeftJProgressBar;
 	private JTextField textField;
+	private JTextField unixTimeJTextField;
 
 	public PlumNodeJPanel(PlumNode newPlumNode) {
 		this();
@@ -87,6 +88,22 @@ public class PlumNodeJPanel extends JPanel {
 		componentGbc_2.gridx = 1;
 		componentGbc_2.gridy = 2;
 		add(spaceLeftJProgressBar, componentGbc_2);
+		
+		JLabel unixTimeLabel = new JLabel("UnixTime:");
+		GridBagConstraints labelGbc_3 = new GridBagConstraints();
+		labelGbc_3.insets = new Insets(5, 5, 5, 5);
+		labelGbc_3.gridx = 0;
+		labelGbc_3.gridy = 3;
+		add(unixTimeLabel, labelGbc_3);
+
+		unixTimeJTextField = new JTextField();
+		GridBagConstraints componentGbc_3 = new GridBagConstraints();
+		componentGbc_3.insets = new Insets(5, 0, 5, 5);
+		componentGbc_3.fill = GridBagConstraints.HORIZONTAL;
+		componentGbc_3.gridx = 1;
+		componentGbc_3.gridy = 3;
+		add(unixTimeJTextField, componentGbc_3);
+
 
 		if (plumNode != null) {
 			m_bindingGroup = initDataBindings();
@@ -159,10 +176,19 @@ public class PlumNodeJPanel extends JPanel {
 						jTextFieldBeanProperty, "auto_binding_id");
 		autoBinding.bind();
 		//
+		BeanProperty<com.plum.tinyos.model.PlumNode, java.lang.String> unixTimeProperty = BeanProperty
+				.create("unixTime");
+		BeanProperty<javax.swing.JTextField, java.lang.String> textProperty = BeanProperty
+				.create("text");
+		AutoBinding<com.plum.tinyos.model.PlumNode, java.lang.String, javax.swing.JTextField, java.lang.String> autoBinding_3 = Bindings
+				.createAutoBinding(AutoBinding.UpdateStrategy.READ, plumNode,
+						unixTimeProperty, unixTimeJTextField, textProperty);
+		autoBinding_3.bind();
 		BindingGroup bindingGroup = new BindingGroup();
 		//
 		bindingGroup.addBinding(autoBinding_1);
 		bindingGroup.addBinding(autoBinding_2);
+		bindingGroup.addBinding(autoBinding_3);
 		bindingGroup.addBinding(autoBinding);
 		return bindingGroup;
 	}

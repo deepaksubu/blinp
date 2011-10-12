@@ -1,11 +1,14 @@
 package com.plum.tinyos.ui;
 
+
 import java.awt.BorderLayout;
+
 import java.awt.Container;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import java.util.Vector;
+import java.util.logging.Logger;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -23,6 +26,7 @@ import com.plum.tinyos.model.PlumList;
 import com.plum.tinyos.model.PlumSampleMsg;
 import com.plum.tinyos.model.PlumSensingApp;
 import com.plum.tinyos.model.PlumStatusMsg;
+import com.plum.tinyos.log.*;
 
 public class SiteManager extends JFrame {
 
@@ -31,7 +35,16 @@ public class SiteManager extends JFrame {
 	JLayeredPane desktop;
 	  Vector popups = new Vector();
 	  PlumSensingApp psa;
+	  private WindowHandler handler = null;
+	  private Logger logger = null;
 	  
+	  public WindowHandler getWindowHandler(){
+		  return this.handler;
+	  }
+	  
+	  public Logger getLogger(){
+		  return this.logger;
+	  }
 	public PlumList plumList;
 
 	  public PlumSensingApp getPsa() {
@@ -102,8 +115,9 @@ public class SiteManager extends JFrame {
 
 	public SiteManager() {
 	    super("Plum Manager");
+	    
 	    plumList=new PlumList();
-	    setSize(450, 250);
+	    setSize(450, 600);
 	    setDefaultCloseOperation(EXIT_ON_CLOSE);
 	    Container contentPane = getContentPane();
 	    BrowserToolBar jtb = new BrowserToolBar(this);
@@ -111,7 +125,7 @@ public class SiteManager extends JFrame {
 	    
 	    //Start Code for Actual devices here
 	      
-			psa = new PlumSensingApp();
+			psa = new PlumSensingApp(this);
 			psa.run();
 			
 
@@ -145,29 +159,48 @@ public class SiteManager extends JFrame {
 		
 		
 		 SiteManager mgr = new SiteManager();
-	    mgr.setVisible(true);
+		 mgr.createWindowHandler();
+		 mgr.setVisible(true);
 	  }
 	  
 	 
 	  
 
 	
-	  // Methods to create our internal frames
+	  private void createWindowHandler() {
+		// TODO Auto-generated method stub
+		  handler = WindowHandler.getInstance(this);
+		    //obtaining a logger instance and setting the handler
+		    logger = Logger.getLogger("sam.logging.handler");
+		    logger.addHandler(handler);
+		
+	}
+
+	// Methods to create our internal frames
 	  public void addSiteFrame(String name, List<Integer> localAddressList) {
 		 
 	    SiteFrame sf = new SiteFrame(name,localAddressList,this);
 	    popups.addElement(sf);
-	    desktop.add(sf, new Integer(1));  // Keep sites on top for now
+	    desktop.add(sf, new Integer(2));  // Keep sites on top for now
 	    sf.setVisible(true);
 	  }
 	  
 	  public void addPageFrame(String name) {
 	    PageFrame pf = new PageFrame(name, this);
-	    desktop.add(pf, new Integer(2));
+	    desktop.add(pf, new Integer(3));
 	    pf.setVisible(true);
 	    pf.setIconifiable(true);
 	    popups.addElement(pf);
 	  }
+	  
+	  public LogWindow addLogWindow(String name,int length,int width) {
+		    LogWindow lf = new LogWindow(name,length,width);
+		    desktop.add(lf, new Integer(1));
+		    lf.setVisible(true);
+		    lf.setIconifiable(true);
+		    popups.addElement(lf);
+			return lf;
+		  }
 
 	  public JInternalFrame getCurrentFrame() {
 	    for (int i = 0; i < popups.size(); i++) {

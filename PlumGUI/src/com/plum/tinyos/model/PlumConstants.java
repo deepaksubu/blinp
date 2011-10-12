@@ -10,5 +10,10 @@ public class PlumConstants {
 	public static final int SCAN_PERIOD = 1000*60*2;
 	public static final int READ_WAIT_PERIOD=1000*60*1;
 	public static final long READ_TIMEOUT_UI = 30;
+	public static final int LOG_WINDOW_OFFSET_Y = 250;
+	public static final int SITE_FRAME_OFFSET_Y = 200;
+	public static final int INITIAL_APP_HEIGTH = 250+250;
+	
+	
 	
 }

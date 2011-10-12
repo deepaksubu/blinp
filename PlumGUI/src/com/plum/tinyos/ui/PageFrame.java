@@ -8,9 +8,12 @@ package com.plum.tinyos.ui;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 import javax.swing.*;
 
+import com.plum.tinyos.log.WindowHandler;
 import com.plum.tinyos.model.FlashState;
 import com.plum.tinyos.model.PlumNode;
 import com.plum.tinyos.model.PlumSensingApp;
@@ -21,6 +24,7 @@ public class PageFrame extends JInternalFrame implements ActionListener {
 	SiteManager parent;
 	PlumNodeJPanel pnPanel;
 	String localPlumId;
+	private WindowHandler h;
 
 	public PageFrame(String plumId, SiteManager sm) {
 		super("Node: " + plumId, true, true, true, true);
@@ -59,6 +63,10 @@ public class PageFrame extends JInternalFrame implements ActionListener {
 					"Are you sure you want to erase the data?");
 			// localPsa.requestSamples(Integer.parseInt(input),"" ,0, 0, true);
 			if (input == 0)
+				h = parent.getWindowHandler();
+				LogRecord r = new LogRecord(Level.INFO,
+				        "Start Erase...\n.");
+				    h.publish(r);
 				localPsa.requestErase(Integer.parseInt(localPlumId));
 		}
 	}

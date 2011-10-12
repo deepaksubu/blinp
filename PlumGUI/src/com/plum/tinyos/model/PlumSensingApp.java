@@ -10,9 +10,16 @@ import net.tinyos.packet.BuildSource;
 import net.tinyos.packet.PhoenixSource;
 import net.tinyos.util.*;
 
+
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+
 import net.tinyos.sf.SerialForwarder;
+
+import com.plum.tinyos.log.WindowHandler;
+import com.plum.tinyos.ui.*;
 
 enum PlumCommands {
 	PLUM_SCAN(1), PLUM_CONFIG(2), PLUM_READ(3), PLUM_ERASE(4), PLUM_ERASE_CONFIG(
@@ -35,8 +42,17 @@ public class PlumSensingApp implements MessageListener {
 	MoteIF baseMote, localMote;
 	boolean m_scan = false, m_read = false;
 	FlashState flashState = new FlashState();
+	SiteManager sm;
 	CollectedDataStore collectedDataStore = new CollectedDataStore(this);
 	
+	public PlumSensingApp(SiteManager sm){
+		this.sm=sm;
+	}
+	
+	public SiteManager getSiteManager(){
+		return this.sm;
+	}
+
 	public CollectedDataStore getCollectedDataStore(){
 		return this.collectedDataStore;
 	}
@@ -111,7 +127,9 @@ public class PlumSensingApp implements MessageListener {
 							receivedMsg.get_last_blockID(),
 							receivedMsg.get_sampleRate(),
 							receivedMsg.get_statusRate(),
-							receivedMsg.get_intvol());
+							receivedMsg.get_intvol(),
+							receivedMsg.get_last_unixTime()
+							);
 					// If the time difference is more than six months (15552000)
 					// then reset the time on the plum device
 					// There needs to be a much better logic to send the time.
@@ -124,6 +142,9 @@ public class PlumSensingApp implements MessageListener {
 								+ ". Old time value: "
 								+ receivedMsg.get_last_unixTime() + ".\n");
 						sendTime(receivedMsg.get_sender());
+					}
+					else{
+						System.out.println("The time is set for " +receivedMsg.get_sender());
 					}
 				} else {
 					System.out.print("Dumped out-of-range status message.\n");
@@ -153,6 +174,10 @@ public class PlumSensingApp implements MessageListener {
 
 			if (m_scan == false) {
 				System.out.print("Scanning...\n");
+				WindowHandler h = WindowHandler.getInstance(sm);
+			    LogRecord r = new LogRecord(Level.INFO,
+			        "Scanning...\n.");
+			    h.publish(r);
 				m_scan = true;
 			} else {
 				System.out.print("Stopping scanning...\n");
@@ -378,7 +403,7 @@ public class PlumSensingApp implements MessageListener {
 			e.printStackTrace();
 		}
 
-		PlumSensingApp me = new PlumSensingApp();
+/*		PlumSensingApp me = new PlumSensingApp(sm);
 		me.run();
 
 		InputStreamReader cin = new InputStreamReader(System.in);
@@ -490,7 +515,7 @@ public class PlumSensingApp implements MessageListener {
 				System.out.print("Error On Input");
 				me.usage();
 			}
-		}
+		}*/
 	}
 
 	public FlashState getFlashState() {

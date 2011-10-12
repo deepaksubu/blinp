@@ -9,6 +9,7 @@ import java.util.logging.LogManager;
 import java.util.logging.LogRecord;
 import java.util.logging.SimpleFormatter;
 
+import com.plum.tinyos.model.PlumConstants;
 import com.plum.tinyos.ui.SiteManager;
 
 
@@ -31,7 +32,7 @@ public class WindowHandler extends Handler {
 	  this.parent=parent;
     configure();
     if (window == null)
-      window = this.parent.addLogWindow("Logging window", 500, 200);
+      window = this.parent.addLogWindow("Logging window", PlumConstants.SITE_FRAME_OFFSET_Y, PlumConstants.WINDOW_WIDTH);
   }
 
   /**

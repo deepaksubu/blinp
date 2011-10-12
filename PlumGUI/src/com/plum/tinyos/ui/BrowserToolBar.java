@@ -70,9 +70,7 @@ public class BrowserToolBar extends JToolBar{
 					} else if (e.getActionCommand() == PlumConstants.READ) {
 						localPsa.requestScan();
 						h = sm.getWindowHandler();
-					    LogRecord r = new LogRecord(Level.INFO,
-					        "Start Downloading...\n.");
-					    h.publish(r);
+
 						// JFileChooser fc = new JFileChooser();
 
 						// int returnVal = fc.showSaveDialog((ToolBarButton) e
@@ -93,6 +91,7 @@ public class BrowserToolBar extends JToolBar{
 								.showInputDialog("Enter Plum Node ID:");
 						localPsa.requestSamples(Integer.parseInt(input), "", 0,
 								0, true);
+						sm.getLogger().info("Read Started: "+input);
 						
 						/*
 						 * try { Thread.sleep(100000L); } catch

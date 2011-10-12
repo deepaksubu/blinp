@@ -13,10 +13,15 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 import net.tinyos.message.MoteIF;
 
 import org.apache.commons.io.IOUtils;
+
+import com.plum.tinyos.log.WindowHandler;
+import com.plum.tinyos.ui.SiteManager;
 
 
 public class CollectedData {
@@ -29,6 +34,8 @@ public class CollectedData {
 	public int blockRcvd;
 	public Integer size;
 	private File f;
+	private SiteManager localSM;
+	private WindowHandler h;
 	
 	public CollectedData(PlumSensingApp app, int addr) {
 		this.seqnoList = new ArrayList<Integer>();
@@ -39,6 +46,7 @@ public class CollectedData {
 		this.addr = addr;
 		this.blockRcvd = 0;
 		this.size = 0;
+		
 		this.f=new File("PlumData.csv");
 	}
 
@@ -109,6 +117,12 @@ public class CollectedData {
 						}
 
 					}
+					localSM=app.getSiteManager();
+					h = localSM.getWindowHandler();
+				    LogRecord r = new LogRecord(Level.INFO,
+				        "Start Writing...\n.");
+				    h.publish(r);
+					
 					for (int seqno=0; seqno<this.messageList.size();seqno++) {
 						PlumSampleMsg pSM = this.messageList.get(seqno);
 						out.write("\n");
@@ -129,9 +143,17 @@ public class CollectedData {
 						out.write(Integer.toString((pSM.get_seqno())));
 						out.write("");
 						System.out.println("Writing to the files");
+						r = new LogRecord(Level.INFO,
+						        "Writing to the files...\n.");
+						    h.publish(r);
+							
+						
 					}
 					} finally{
 						out.close();
+						LogRecord r1 = new LogRecord(Level.INFO,
+						        "Writing finished...\n.");
+						 h.publish(r1);
 						System.out.println("Writing finished");
 						
 					}

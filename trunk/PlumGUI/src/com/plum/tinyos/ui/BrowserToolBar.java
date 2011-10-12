@@ -8,9 +8,12 @@ import java.beans.PropertyChangeListener;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
 
 import javax.swing.*;
 
+import com.plum.tinyos.log.WindowHandler;
 import com.plum.tinyos.model.FlashState;
 import com.plum.tinyos.model.PlumConstants;
 import com.plum.tinyos.model.PlumSensingApp;
@@ -32,6 +35,8 @@ public class BrowserToolBar extends JToolBar{
 			button.addActionListener(new ActionListener() {
 
 			
+
+				private WindowHandler h;
 
 				@Override
 				public void actionPerformed(ActionEvent e) {
@@ -64,6 +69,10 @@ public class BrowserToolBar extends JToolBar{
 
 					} else if (e.getActionCommand() == PlumConstants.READ) {
 						localPsa.requestScan();
+						h = sm.getWindowHandler();
+					    LogRecord r = new LogRecord(Level.INFO,
+					        "Start Downloading...\n.");
+					    h.publish(r);
 						// JFileChooser fc = new JFileChooser();
 
 						// int returnVal = fc.showSaveDialog((ToolBarButton) e

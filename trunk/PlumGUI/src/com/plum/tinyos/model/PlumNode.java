@@ -11,7 +11,14 @@ public class PlumNode{
 		super();
 		
 	}
-	
+	public String unixTime;
+	public String getUnixTime() {
+		return unixTime;
+	}
+
+	public void setUnixTime(String unixTime) {
+		this.unixTime = unixTime;
+	}
 	public int id;
 	public int getId() {
 		return id;
@@ -49,13 +56,14 @@ public class PlumNode{
 		this.spaceLeft=100;
 	}
 	
-	public PlumNode(int id, int batteryLeft, int lastBlock){
+	public PlumNode(int id, int batteryLeft, int lastBlock,long unixTime){
 		super();
 		this.id=id;
 		float fbatteryLeft=((float)batteryLeft/4095)*100;
 		this.batteryLeft=Math.round(fbatteryLeft);
 		float fspaceLeft=((float)(3475-lastBlock)/3475)*100;
 		this.spaceLeft=Math.round(fspaceLeft);
+		this.unixTime=Long.toString(unixTime);
 	}
  
 }

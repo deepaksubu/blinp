@@ -13,6 +13,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 
 import com.plum.tinyos.model.FlashState;
+import com.plum.tinyos.model.PlumConstants;
 import com.plum.tinyos.model.PlumSensingApp;
 
 public class SiteFrame extends JInternalFrame {
@@ -26,8 +27,8 @@ String[] plums={};
 public SiteFrame(String name, List<Integer> localAddressList, SiteManager sm) {
  super("Nodes Detected ", true, true, true);
  parent = sm;
- //setBounds(0,0,250,100);
- setBounds(0,0,250,parent.getHeight());
+ setBounds(0,0,250,PlumConstants.SITE_FRAME_OFFSET_Y);
+ //setBounds(0,0,250,parent.getHeight());
  this.maximizable=false;
  String[] reference=new String[localAddressList.size()];
  int counter=0;

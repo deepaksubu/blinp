@@ -158,6 +158,7 @@ public class DataCollector implements Runnable {
 						Thread.sleep(32000L);
 					}
 					readRetries = readRetries + 1;
+					
 				}
 
 				longTimeoutCount = longTimeoutCount + 1;

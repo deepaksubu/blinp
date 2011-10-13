@@ -67,12 +67,12 @@ public class CollectedData {
 
 //		if ((indexSeqno == indexUnixTime && indexUnixTime == indexBlockID) && (indexBlockID >= 0)) {
 //		if (indexSeqno == indexUnixTime && indexUnixTime >= 0) {
-		if (indexSeqno >= 0) {
+		//if (indexSeqno >= 0) {
 //		if (indexSeqno >= 0 && indexUnixTime >= 0 && blockIDList.get(indexUnixTime) == blockID)
 			// Duplicate!
-//			System.out.print("Received duplicate - dumping: seqno = " + seqno + " , unixTime = " + unixTime + " , blockID = " + blockID + "\n");
-		}
-		else {					
+		//	System.out.print("Received duplicate - dumping: seqno = " + seqno + " , unixTime = " + unixTime + " , blockID = " + blockID + "\n");
+		//}
+		//else {					
 			seqnoList.add(seqno);
 			unixTimeList.add(unixTime);
 			blockIDList.add(blockID);
@@ -86,7 +86,7 @@ public class CollectedData {
 			if (blockID > this.blockRcvd || (blockID == 2 && this.blockRcvd > 4)) {
 				this.blockRcvd = blockID;
 			}
-		}
+		//}
 	}
 	public boolean writeFile() throws FileNotFoundException {
 		// TODO Auto-generated method stub

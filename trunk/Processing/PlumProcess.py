@@ -1,3 +1,5 @@
+from numpy import *
+
 def truncate_time(input):
     return (((input/1000.0)/3600.0)/24.0)
 
@@ -84,7 +86,7 @@ def edge_find(file_path):
 #    print "count_array", count_array, len(count_array)
 
 def events_from_edges(edge_array,end_array):
-    print edge_array,len(edge_array)
+#    print edge_array,len(edge_array)
 
     edge_subsumption_threshold=0.006944444
     min_activity_length=0.00017361
@@ -128,6 +130,111 @@ def events_from_edges(edge_array,end_array):
                 count = 0
         if ed_ctr==len(edge_array):
            break
-    print len(entries), entries
+    actDur=findActDur(entries,exits)
+    edgeData=findRelevantEdges(edge_array,end_array,entries , exits)
+    t1=0.0041667
+    t2=0.0010417
+    splitActivity( entries , exits , edgeData , actDur , t1 , t2 )
+#    print len(entries), entries
+    
+
+def findActDur(entries,exits):
+    activity_dur = []
+    for ele in range(0,len(entries)):
+        activity_dur.append(exits[ele]-entries[ele])
+    return activity_dur
+
+def findRelevantEdges( edges , ends , entries , exits):
+    edgeData =[None]*len(entries)
+
+#The most fucked up logic yet
+    for i in range(0,1):
+#        edgeData.append([None]*2)#.append = cell(length(entries{i}),1);
+        for j in range(0,len(entries)):
+            edgeData[j]=[None]*2
+            #edgeData[i].append([])
+            edge_list=where(logical_and(array(edges) >= entries[j],array(edges) <=exits[j])==True,1,0)
+            templist=list(edge_list)
+            trunclist=[]
+            for ele in range(0,len(templist)):
+                if templist[ele] != 0.0:
+                    trunclist.append(edges[ele])
+            edgeData[j][0]=trunclist
+
+#           edgeData[i][0]=templist
+#edgeData[i].append([])
+            end_list=where(logical_and(array(ends) >= entries[j],array(ends) <=exits[j])==True,1,0)
+            templist=list(end_list)
+            trunclist=[]
+            for ele in range(0,len(templist)):
+                if templist[ele] != 0.0:
+                    trunclist.append(ends[ele])
+            edgeData[j][1]=trunclist
+    return edgeData
+
+                    
+
+#            edgeData[i].append([])
+#            edgeData[i][1]=templist
+            #print logical_list
+#        edgeData[i][j][0] = edges[i];
+#        edgeData[i][j][1] = ends{i}(ends{i} >= entries{i}(j) & ...
+#            ends{i} <= exits{i}(j));
+#    print edgeData
+
+def splitActivity( entries , exits , edgeData , actDur , t1 , t2 ):
+    newEntry = []#[None]*len(entries)#cell(size(entries));
+    newExit =  []#[None]*len(entries)#cell(size(entries));
+
+    loneEnd = []#[None]*len(entries)#cell(size(entries));
+
+    for i in range(0,1):#for i = 1:length(entries)              % loop through each HH
+        for j in range(0,len(entries)):#for j = 1:length(entries{i})       % loop through each activity start
+            newEntry.append(entries[j])#newEntry{i} = [newEntry{i}; entries{i}(j)];   % add new entry
+            loneEnd.append(-1)#loneEnd{i} = [loneEnd{i}; -1];
+        
+#        % check activity threshold
+            if actDur[j] > t1:
+                loneEnd[-1] = 0;
+                tempEdges=edgeData[j][0]#tempEdges = edgeData{i}{j}{1};   % grab relevant edges / ends
+                tempEnds=edgeData[j][1]#tempEnds = edgeData{i}{j}{2};
+            
+#            % loop through edges
+                m = 1#            m = 2;
+                while m<(len(tempEdges)-1):#while m < length(tempEdges)
+                    if tempEdges[m+1] - tempEnds[m]>t2:#if tempEdges(m+1) - tempEnds(m) > t2
+                   #                % if edge-to-end > t2
+                        newExit.append(tempEnds[m])#newExit{i} = [newExit{i}; tempEnds(m)];
+                        newEntry.append(tempEdges[m+1])#newEntry{i} = [newEntry{i}; tempEdges(m+1)];
+                        loneEnd.append(0)#loneEnd{i} = [loneEnd{i}; 0];
+                        print "Before m",m
+                        if m+1 ==len(tempEdges):#if m+1 == length(tempEdges)
+                            loneEnd.append(1)#loneEnd{i}(end) = 1;
+                    #end
+                        print "After m",m    
+                        m = m+1;
+
+                #end
+                    m = m+1;
+            #end
+            
+        #end
+            newExit.append(exits[j])# newExit{i} = [newExit{i}; exits{i}(j)];
+        print newExit,len(newExit)
+        
+#    end
+    
+#end
+
+#end
+
+#    end
+                       
+    
+#end
+
+#end
+
+
 if __name__=="__main__":
    edge_find("/home/deepak/Development/Processing/PLUM/DemoData1/PLUM-Bhubaneswar/Week_1/Device_29/data0000.csv")

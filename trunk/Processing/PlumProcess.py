@@ -30,8 +30,8 @@ def edge_find(file_path):
     for ele in temp_array: 
         if (final_timestamp-ele >= 1/24.0):        
             timeseries_array.append(ele)
-        else:
-            print ele
+        #else:
+           # print ele
                       
     #print timeseries_array
     edge_detection_constant=truncate_time(15000.0)#0.000173611111111
@@ -51,7 +51,7 @@ def edge_find(file_path):
                 dist_btw_motion=timeseries_array[tcounter+1]-timeseries_array[tcounter]  
             
         dist_btw_motion= timeseries_array[tcounter+1]-timeseries_array[tcounter]
-        while dist_btw_motion < edge_detection_constant :
+        while dist_btw_motion < edge_detection_constant and tcounter < len(timeseries_array):
             tcounter=tcounter+1
             count=count+1
             if (tcounter==len(timeseries_array)-1):
@@ -78,10 +78,56 @@ def edge_find(file_path):
        # if tcounter==(len(timeseries_array)-2):
        #     break;
         
-
-    print "end_array" , end_array
+    events_from_edges(edge_array,end_array)
+#    print "end_array" , end_array
 #    print "edge_array" , edge_array
 #    print "count_array", count_array, len(count_array)
 
+def events_from_edges(edge_array,end_array):
+    print edge_array,len(edge_array)
+
+    edge_subsumption_threshold=0.006944444
+    min_activity_length=0.00017361
+    rejected=0
+    entries=[]
+    exits=[]
+    ed_ctr=0
+    count=0
+      
+    while ed_ctr < len(edge_array):
+        temp_edge=edge_array[ed_ctr]
+#        print temp_edge
+    
+# % subsume following edge based on time threshold
+#            while m < length(edges{i,j}) && ...
+#                    edges{i,j}(m+1)-edges{i,j}(m) < t1
+#                count = count + 1;
+#                m = m+1;
+#            end
+        dist_btw_events=edge_array[ed_ctr+1]-edge_array[ed_ctr]
+        while dist_btw_events < edge_subsumption_threshold:
+            ed_ctr=ed_ctr+1
+            count=count+1
+            if ed_ctr == len(edge_array)-1:
+                break
+            else:
+                dist_btw_events=edge_array[ed_ctr+1]-edge_array[ed_ctr]
+
+        temp_end=end_array[ed_ctr]
+#        print temp_end - temp_edge, ed_ctr
+        if count == 0 and temp_end-temp_edge < min_activity_length:
+             #   %disp(datestr(tempEdge))         % display rejected time
+                rejected = rejected+1          # increment rejected count
+                ed_ctr = ed_ctr+1
+                
+#            % else declare entry, exit
+        else:
+                entries.append(temp_edge)
+                exits.append(temp_end)
+                ed_ctr = ed_ctr+1
+                count = 0
+        if ed_ctr==len(edge_array):
+           break
+    print len(entries), entries
 if __name__=="__main__":
    edge_find("/home/deepak/Development/Processing/PLUM/DemoData1/PLUM-Bhubaneswar/Week_1/Device_29/data0000.csv")

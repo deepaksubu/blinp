@@ -1,14 +1,14 @@
 from numpy import *
 
 def truncate_time(input):
-    return (((input/1000.0)/3600.0)/24.0)
+    return (((input/1000.0000)/3600.0000)/24.0000)
 
 def edge_find(file_path):
     device_log=open(file_path)
     li=device_log.read()
-    init_time=734332.6396
-    start_time=734334.6458
-    end_time=734341.6014
+    init_time=734332.639600000
+    start_time=734334.64580000
+    end_time=734341.6014000000
     timeseries_array_str=li.split(",")[0:-1]
 #    print timeseries_array_str
 
@@ -36,12 +36,12 @@ def edge_find(file_path):
            # print ele
                       
     #print timeseries_array
-    edge_detection_constant=truncate_time(15000.0)#0.000173611111111
-    max_edge_length=truncate_time(120000.0)
+    edge_detection_constant=truncate_time(15000.00000)#0.000173611111111
+    max_edge_length=truncate_time(120000.00000)
     edge_array=[]
     end_array=[]
     count_array=[]
-    tcounter=0
+    tcounter=1
     #for tcounter in range(len(timeseries_array)):
     while tcounter<len(timeseries_array):
         t0=timeseries_array[tcounter] 
@@ -96,7 +96,7 @@ def events_from_edges(edge_array,end_array):
     ed_ctr=0
     count=0
       
-    while ed_ctr < len(edge_array):
+    while ed_ctr < (len(edge_array)-1):
         temp_edge=edge_array[ed_ctr]
 #        print temp_edge
     
@@ -107,7 +107,7 @@ def events_from_edges(edge_array,end_array):
 #                m = m+1;
 #            end
         dist_btw_events=edge_array[ed_ctr+1]-edge_array[ed_ctr]
-        while dist_btw_events < edge_subsumption_threshold:
+        while dist_btw_events < edge_subsumption_threshold and ed_ctr < len(edge_array)-1:
             ed_ctr=ed_ctr+1
             count=count+1
             if ed_ctr == len(edge_array)-1:
@@ -220,7 +220,8 @@ def splitActivity( entries , exits , edgeData , actDur , t1 , t2 ):
             
         #end
             newExit.append(exits[j])# newExit{i} = [newExit{i}; exits{i}(j)];
-        print newExit,len(newExit)
+        var= raw_input(">>Enter what variable u want to inspect")
+        print ">>",newEntry[int(var)],len(newEntry)
         
 #    end
     
@@ -237,4 +238,4 @@ def splitActivity( entries , exits , edgeData , actDur , t1 , t2 ):
 
 
 if __name__=="__main__":
-   edge_find("/home/deepak/Development/Processing/PLUM/DemoData1/PLUM-Bhubaneswar/Week_1/Device_29/data0000.csv")
+   edge_find("/home/deepak/Development/Processing/PLUM/DemoData1/PLUM-Bhubaneswar/Week_1/Device_14/data0000.csv")

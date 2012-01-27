@@ -1,21 +1,23 @@
 from numpy import *
-
+# Only look at those values which are a week greater than the unix epoch time Jan 1970 or something for baseline
 def truncate_time(input):
-    return (((input/1000.0000)/3600.0000)/24.0000)
+#    return (((input/1000.0000)/3600.0000)/24.0000)
+    return (((input)/3600.0000)/24.0000)
 
 def edge_find(file_path):
     device_log=open(file_path)
     li=device_log.read()
-    init_time =734332.6319444445
-    start_time=734334.6527777778
-    end_time=734341.6111111111
+    init_time =0#734331.6319444445
+    start_time=0
+#    end_time=73434100.6111111111
     timeseries_array_str=li.split(",")[0:-1]
     #add the init time
-    timeseries_array_full=[(truncate_time(float(ele))+init_time) for ele in timeseries_array_str][0:]
+    timeseries_array_full=[(truncate_time(float(ele))) for ele in timeseries_array_str][0:]
+    print timeseries_array_full[0:40]
     timeseries_array=[]
 #   truncate time series array between start and end time
     for ele in range(0,len(timeseries_array_full)):
-        if ( timeseries_array_full[ele] >= start_time and timeseries_array_full[ele] <= end_time):
+        if ( timeseries_array_full[ele] >= start_time):# and timeseries_array_full[ele] <= end_time):
             timeseries_array.append(timeseries_array_full[ele])
     final_timestamp=timeseries_array[len(timeseries_array)-1]
 
@@ -26,14 +28,13 @@ def edge_find(file_path):
         if (final_timestamp-ele >= 1/24.0):        
             timeseries_array.append(ele)
 
-    edge_detection_constant=truncate_time(15000.00000)#0.000173611111111
-    max_edge_length=truncate_time(120000.00000)
+    edge_detection_constant=truncate_time(15.00000)#0.000173611111111
+    max_edge_length=truncate_time(120.00000)
     edges=[]
     ends=[]
     counts=[]
     tcounter=1
     while tcounter<len(timeseries_array):
-                ##Everything is same till here  more or less there is some issue at the end of the decimal point          
         t0=timeseries_array[tcounter] 
         edges.append(t0)
         count=1   
@@ -60,7 +61,7 @@ def edge_find(file_path):
                 edges.pop()
                 ends.pop()
         tcounter=tcounter+1
-    print edges,len(edges)
+    #print edges,len(edges)
     events_from_edges(edges,ends)
 
 def events_from_edges(edge_array,end_array):
@@ -97,8 +98,8 @@ def events_from_edges(edge_array,end_array):
                 ed_ctr = ed_ctr+1
                 count = 0
 
-    print entries, len(entries)
-    print rejected
+#    print entries, len(entries)
+#    print rejected
     actDur=findActDur(entries,exits)
     edgeData=findRelevantEdges(edge_array,end_array,entries , exits)
     t1=0.0041667
@@ -116,23 +117,29 @@ def findActDur(entries,exits):
 
 def findRelevantEdges( edges , ends , entries , exits):
     edgeData =[None]*len(entries)
-    for j in range(0,len(entries)):
-        edgeData[j]=[None]*2
-            #edgeData[i].append([])
-        edge_list=where(logical_and(array(edges) >= entries[j],array(edges) <=exits[j])==True,1,0)
-        templist=list(edge_list)
-        trunclist=[]
-        for ele in range(0,len(templist)):
-            if templist[ele] != 0.0:
-                trunclist.append(edges[ele])
-        edgeData[j][0]=trunclist
-        end_list=where(logical_and(array(ends) >= entries[j],array(ends) <=exits[j])==True,1,0)
-        templist=list(end_list)
-        trunclist=[]
-        for ele in range(0,len(templist)):
-            if templist[ele] != 0.0:
-                trunclist.append(ends[ele])
-        edgeData[j][1]=trunclist
+    for i in range(0,1):
+#        edgeData.append([None]*2)#.append = cell(length(entries{i}),1);                                                                                                
+        for j in range(0,len(entries)):
+            edgeData[j]=[None]*2
+            #edgeData[i].append([])                                                                                                                                     
+            edge_list=where(logical_and(array(edges) >= entries[j],array(edges) <=exits[j])==True,1,0)
+            templist=list(edge_list)
+            trunclist=[]
+            for ele in range(0,len(templist)):
+                if templist[ele] != 0.0:
+                    trunclist.append(edges[ele])
+            edgeData[j][0]=trunclist
+
+#           edgeData[i][0]=templist                                                                                                                                     
+#edgeData[i].append([])                                                                                                                                                 
+            end_list=where(logical_and(array(ends) >= entries[j],array(ends) <=exits[j])==True,1,0)
+            templist=list(end_list)
+            trunclist=[]
+            for ele in range(0,len(templist)):
+                if templist[ele] != 0.0:
+                    trunclist.append(ends[ele])
+            edgeData[j][1]=trunclist
+#    print edgeData
     return edgeData
 
 def splitActivity( entries , exits , edgeData , actDur , t1 , t2 ):
@@ -160,5 +167,7 @@ def splitActivity( entries , exits , edgeData , actDur , t1 , t2 ):
                         m = m+1;
                     m = m+1;
             newExit.append(exits[j])
+    print newExit,len(newExit)
+    print newEntry,len(newEntry)
 if __name__=="__main__":
     edge_find("/home/deepak/development/processing/PLUM/DemoData1/PLUM-Bhubaneswar/Week_1/Device_14/data0000.csv")

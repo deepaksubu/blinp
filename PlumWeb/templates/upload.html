@@ -1,0 +1,6 @@
+<html>
+<form enctype="multipart/form-data" action=" process/calculate/" method="post">{% csrf_token %}
+{{ form.as_p }}
+<input type="submit" value="Submit" />
+</form>
+</html>

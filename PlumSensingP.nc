@@ -188,7 +188,8 @@ module PlumSensingP {
 				
 		sampleDoneCnt = 0;
 
-		if (call ReadPIR.read() == 1) {
+		if (call ReadUltraSound.read() == SUCCESS) {
+		
 			plum_sample_msg->seqno = seqno++;
 			plum_sample_msg->sender = TOS_NODE_ID;
 			plum_sample_msg->sampleRate = sample_period;

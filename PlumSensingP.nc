@@ -37,7 +37,7 @@ module PlumSensingP {
 #define N_SENSORS 1	
 		interface Read<uint16_t> as ReadIntVol;
 
-		interface PIRSensor as ReadPIR;
+		interface MaxBotixRead as ReadUltraSound;
 	}
 
 } implementation {

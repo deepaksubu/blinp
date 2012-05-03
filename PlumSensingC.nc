@@ -47,9 +47,10 @@ configuration PlumSensingC {
 #endif
   
   // Sensors
-  components new Msp430InternalVoltageC();
-  components PIRSensorC;
-  
+  components new Msp430InternalVoltageC();  
+  components MaxBotixDriverC;
+ 
   App.ReadIntVol -> Msp430InternalVoltageC.Read;
-  App.ReadPIR -> PIRSensorC.PIRSensor;
+  App.ReadUltraSound -> MaxBotixDriverC.MaxBotixRead;
+
 }
